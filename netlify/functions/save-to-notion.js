@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         parent: {
           type: 'data_source_id',
-          database_id: process.env.DATA_SOURCE_ID
+          data_source_id: process.env.DATA_SOURCE_ID
         },
         properties: {
           '오늘의 한줄 제목/Story': {
