@@ -267,18 +267,56 @@
     </div>
 
     <script>
-        // 페이지 로드 시 오늘 날짜 설정
+        // 멤버 목록 로드
+        async function loadMembers() {
+            const select = document.getElementById('name');
+            
+            try {
+                const response = await fetch('/.netlify/functions/get-members');
+                const data = await response.json();
+                
+                if (data.members) {
+                    data.members.forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id; // ID를 value로
+                        option.textContent = member.name; // 이름을 표시
+                        option.dataset.name = member.name; // 이름 저장
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('멤버 로드 실패:', error);
+                // 실패 시 기본 멤버 추가
+                [
+                    { id: '기본-id-1', name: '이두승' },
+                    { id: '기본-id-2', name: '김태영' }
+                ].forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.name;
+                    option.dataset.name = member.name;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = today;
+            loadMembers();
         });
 
         // 폼 제출
         document.getElementById('runningForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const nameSelect = document.getElementById('name');
+            const selectedOption = nameSelect.options[nameSelect.selectedIndex];
+
             const formData = {
-                name: document.getElementById('name').value,
+                memberId: nameSelect.value, // 선택된 멤버 ID
+                name: selectedOption.dataset.name || selectedOption.textContent, // 멤버 이름 (표시용)
                 date: document.getElementById('date').value,
                 duration: document.getElementById('duration').value,
                 title: document.getElementById('title').value,
