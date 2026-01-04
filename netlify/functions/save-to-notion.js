@@ -37,7 +37,7 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         parent: {
-          type: 'database_id',
+          type: 'databdata_source_id',
           database_id: process.env.DATA_SOURCE_ID
         },
         properties: {
