@@ -98,10 +98,47 @@
             display: none;
         }
 
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            #name {
+                position: absolute;
+                width: calc(100% - 30px);
+                z-index: 100;
+                background: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                max-height: 250px;
+                margin-top: 5px;
+            }
+            
+            #name.collapsed {
+                display: none;
+            }
+            
+            #nameSearch.selected {
+                background: white;
+            }
+        }
+
         .member-count {
             font-size: 12px;
             color: #999;
             margin-top: 5px;
+        }
+
+        /* 날짜 input 개선 */
+        input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            line-height: normal;
+        }
+
+        input[type="date"]::-webkit-date-and-time-value {
+            text-align: left;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
         }
 
         .required {
@@ -380,12 +417,20 @@
                 if (e.target.value) {
                     const selectedText = e.target.options[e.target.selectedIndex].textContent;
                     searchInput.value = selectedText;
-                    select.size = 1; // 선택 후 크기 축소
+                    searchInput.classList.add('selected');
+                    
+                    // 모바일에서는 셀렉트박스 숨김
+                    if (window.innerWidth <= 768) {
+                        select.classList.add('collapsed');
+                    } else {
+                        select.size = 1; // 데스크탑에서는 크기만 축소
+                    }
                 }
             });
 
             // 검색창 포커스 시 전체 목록 표시
             searchInput.addEventListener('focus', () => {
+                select.classList.remove('collapsed');
                 select.size = 5; // 목록 확장
                 if (searchInput.value && select.value) {
                     // 이미 선택된 값이 있으면 검색창 비우기
@@ -401,6 +446,21 @@
                     if (select.options.length > 1) {
                         select.selectedIndex = 1;
                         select.dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+
+            // 초기 상태: 모바일에서는 셀렉트박스 숨김
+            if (window.innerWidth <= 768) {
+                select.classList.add('collapsed');
+            }
+
+            // 화면 밖 클릭 시 셀렉트박스 닫기
+            document.addEventListener('click', (e) => {
+                const wrapper = document.querySelector('.select-wrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    if (window.innerWidth <= 768) {
+                        select.classList.add('collapsed');
                     }
                 }
             });
