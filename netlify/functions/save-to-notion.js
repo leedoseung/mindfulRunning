@@ -27,6 +27,10 @@ exports.handler = async (event, context) => {
   try {
     const formData = JSON.parse(event.body);
     
+    // 디버깅: 환경 변수 확인
+    console.log('DATA_SOURCE_ID:', process.env.DATA_SOURCE_ID);
+    console.log('NOTION_API_KEY exists:', !!process.env.NOTION_API_KEY);
+    
     // Notion API 호출
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
@@ -44,8 +48,8 @@ exports.handler = async (event, context) => {
           '오늘의 한줄 제목/Story': {
             title: [{ text: { content: formData.title } }]
           },
-          'MFRS이름': {
-            select: { name: formData.name }
+          '이름`': {
+            relation: [{ id: formData.memberId }]
           },
           '달린 날짜': {
             date: { start: formData.date }
