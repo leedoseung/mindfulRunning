@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마인드풀러닝 기록</title>
+    
+    <!-- 파비콘 -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
     <style>
         * {
             margin: 0;
@@ -54,6 +58,50 @@
             color: #333;
             font-weight: 500;
             font-size: 14px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        #nameSearch {
+            margin-bottom: 8px;
+        }
+
+        #name {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0;
+            background: white;
+        }
+
+        #name option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #name option:hover {
+            background: #f8f9fa;
+        }
+
+        #name option:checked,
+        #name option:focus {
+            background: #667eea;
+            color: white;
+        }
+
+        #name.hidden {
+            display: none;
+        }
+
+        .member-count {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
         }
 
         .required {
@@ -214,9 +262,18 @@
         <form id="runningForm">
             <div class="form-group">
                 <label>이름 <span class="required">*</span></label>
-                <select id="name" required>
-                    <option value="">선택해주세요</option>
-                </select>
+                <div class="select-wrapper">
+                    <input 
+                        type="text" 
+                        id="nameSearch" 
+                        placeholder="이름 검색..." 
+                        autocomplete="off"
+                    >
+                    <select id="name" required size="5">
+                        <option value="">선택해주세요</option>
+                    </select>
+                    <div class="member-count" id="memberCount"></div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -265,6 +322,93 @@
     </div>
 
     <script>
+        // 검색 기능 설정
+        function setupSearch() {
+            const searchInput = document.getElementById('nameSearch');
+            const select = document.getElementById('name');
+            const memberCount = document.getElementById('memberCount');
+            let allOptions = [];
+
+            // 모든 옵션 저장 (첫 번째 "선택해주세요" 제외)
+            function saveOptions() {
+                allOptions = Array.from(select.options).filter(opt => opt.value !== '');
+            }
+
+            // 옵션 업데이트
+            function updateOptions(optionsToShow) {
+                // 기존 옵션 제거 (첫 번째 제외)
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                // 필터링된 옵션 추가
+                optionsToShow.forEach(opt => {
+                    select.add(opt.cloneNode(true));
+                });
+
+                // 멤버 수 업데이트
+                memberCount.textContent = `${optionsToShow.length}명 표시 / 전체 ${allOptions.length}명`;
+
+                // 결과가 없으면 메시지 표시
+                if (optionsToShow.length === 0) {
+                    const noResult = document.createElement('option');
+                    noResult.textContent = '검색 결과 없음';
+                    noResult.disabled = true;
+                    select.add(noResult);
+                    memberCount.textContent = `0명 표시 / 전체 ${allOptions.length}명`;
+                }
+            }
+
+            // 검색 필터링
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    // 검색어 없으면 전체 표시
+                    updateOptions(allOptions);
+                } else {
+                    // 검색어로 필터링
+                    const filtered = allOptions.filter(opt => 
+                        opt.textContent.toLowerCase().includes(searchTerm)
+                    );
+                    updateOptions(filtered);
+                }
+            });
+
+            // 옵션 선택 시 검색창에 표시하고 선택 완료
+            select.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    const selectedText = e.target.options[e.target.selectedIndex].textContent;
+                    searchInput.value = selectedText;
+                    select.size = 1; // 선택 후 크기 축소
+                }
+            });
+
+            // 검색창 포커스 시 전체 목록 표시
+            searchInput.addEventListener('focus', () => {
+                select.size = 5; // 목록 확장
+                if (searchInput.value && select.value) {
+                    // 이미 선택된 값이 있으면 검색창 비우기
+                    searchInput.value = '';
+                    updateOptions(allOptions);
+                }
+            });
+
+            // 검색창에서 Enter 키 누르면 첫 번째 항목 선택
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (select.options.length > 1) {
+                        select.selectedIndex = 1;
+                        select.dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+
+            // 초기 옵션 저장
+            saveOptions();
+        }
+
         // 멤버 목록 로드
         async function loadMembers() {
             const select = document.getElementById('name');
@@ -287,6 +431,13 @@
                         select.appendChild(option);
                     });
                     console.log('✅ 멤버 로드 성공:', data.members.length);
+                    
+                    // 멤버 수 표시
+                    document.getElementById('memberCount').textContent = `총 ${data.members.length}명`;
+                    
+                    // 검색 기능 활성화
+                    setupSearch();
+                    
                     return;
                 }
             } catch (error) {
