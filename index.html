@@ -273,31 +273,35 @@
             
             try {
                 const response = await fetch('/.netlify/functions/get-members');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
-                if (data.members) {
+                if (data.members && data.members.length > 0) {
                     data.members.forEach(member => {
                         const option = document.createElement('option');
-                        option.value = member.id; // ID를 value로
-                        option.textContent = member.name; // 이름을 표시
-                        option.dataset.name = member.name; // 이름 저장
+                        option.value = member.id;
+                        option.textContent = member.name;
+                        option.dataset.name = member.name;
                         select.appendChild(option);
                     });
+                    console.log('✅ 멤버 로드 성공:', data.members.length);
+                    return;
                 }
             } catch (error) {
-                console.error('멤버 로드 실패:', error);
-                // 실패 시 기본 멤버 추가
-                [
-                    { id: '기본-id-1', name: '이두승' },
-                    { id: '기본-id-2', name: '김태영' }
-                ].forEach(member => {
-                    const option = document.createElement('option');
-                    option.value = member.id;
-                    option.textContent = member.name;
-                    option.dataset.name = member.name;
-                    select.appendChild(option);
-                });
+                console.error('❌ 멤버 로드 실패:', error);
             }
+            
+            // 실패 시: 에러 메시지 표시
+            alert('멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.');
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '멤버 로드 실패 - 관리자에게 문의';
+            option.disabled = true;
+            select.appendChild(option);
         }
 
         // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
