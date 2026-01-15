@@ -60,6 +60,8 @@
 
       .form-group {
         margin-bottom: 20px;
+        position: relative;
+        clear: both;
       }
 
       label {
@@ -68,14 +70,18 @@
         color: #333;
         font-weight: 500;
         font-size: 14px;
+        clear: both;
       }
 
       .select-wrapper {
         position: relative;
+        margin-bottom: 10px;
       }
 
       #nameSearch {
         margin-bottom: 8px;
+        -webkit-appearance: none;
+        appearance: none;
       }
 
       #name {
@@ -86,6 +92,8 @@
         border-radius: 10px;
         padding: 0;
         background: white;
+        -webkit-appearance: none;
+        appearance: none;
       }
 
       #name option {
@@ -108,22 +116,40 @@
         display: none;
       }
 
+      #name.collapsed {
+        display: none;
+      }
+
+      /* iOS Safari 호환성 */
+      @supports (-webkit-overflow-scrolling: touch) {
+        #name {
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        .select-wrapper {
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+        }
+      }
+
       /* 모바일 반응형 */
       @media (max-width: 768px) {
         .select-wrapper {
           position: relative;
+          overflow: visible;
         }
 
         #name {
           position: absolute;
           width: 100%;
           left: 0;
-          top: 100%;
-          z-index: 100;
+          top: calc(100% + 8px);
+          z-index: 1000;
           background: white;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           max-height: 250px;
-          margin-top: 5px;
+          margin-top: 0;
+          border: 2px solid #667eea;
         }
 
         #name.collapsed {
@@ -136,6 +162,10 @@
 
         .container {
           padding: 20px;
+        }
+
+        body {
+          -webkit-text-size-adjust: 100%;
         }
       }
 
@@ -151,6 +181,7 @@
         -moz-appearance: none;
         appearance: none;
         line-height: normal;
+        position: relative;
       }
 
       input[type="date"]::-webkit-date-and-time-value {
@@ -159,6 +190,14 @@
 
       input[type="date"]::-webkit-calendar-picker-indicator {
         cursor: pointer;
+        opacity: 1;
+      }
+
+      /* iOS Safari 날짜 input 수정 */
+      @supports (-webkit-touch-callout: none) {
+        input[type="date"] {
+          min-height: 44px;
+        }
       }
 
       .required {
@@ -489,12 +528,9 @@
             searchInput.value = selectedText;
             searchInput.classList.add("selected");
 
-            // 모바일에서는 셀렉트박스 숨김
-            if (window.innerWidth <= 768) {
-              select.classList.add("collapsed");
-            } else {
-              select.size = 1; // 데스크탑에서는 크기만 축소
-            }
+            // 드롭다운 숨김
+            select.classList.add("collapsed");
+            select.style.display = "none";
           }
         });
 
@@ -502,6 +538,8 @@
         searchInput.addEventListener("focus", () => {
           select.classList.remove("collapsed");
           select.size = 5; // 목록 확장
+          select.style.display = "block"; // 명시적으로 표시
+          
           if (searchInput.value && select.value) {
             // 이미 선택된 값이 있으면 검색창 비우기
             searchInput.value = "";
@@ -521,17 +559,15 @@
         });
 
         // 초기 상태: 모바일에서는 셀렉트박스 숨김
-        if (window.innerWidth <= 768) {
-          select.classList.add("collapsed");
-        }
+        select.classList.add("collapsed");
+        select.style.display = "none";
 
         // 화면 밖 클릭 시 셀렉트박스 닫기
         document.addEventListener("click", (e) => {
           const wrapper = document.querySelector(".select-wrapper");
           if (wrapper && !wrapper.contains(e.target)) {
-            if (window.innerWidth <= 768) {
-              select.classList.add("collapsed");
-            }
+            select.classList.add("collapsed");
+            select.style.display = "none";
           }
         });
 
