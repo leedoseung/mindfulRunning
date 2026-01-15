@@ -86,14 +86,22 @@
 
       #name {
         width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
+        max-height: 0;
+        overflow: hidden;
         border: 2px solid #e0e0e0;
         border-radius: 10px;
         padding: 0;
         background: white;
         -webkit-appearance: none;
         appearance: none;
+        transition: max-height 0.3s ease;
+      }
+
+      #name.show {
+        max-height: 250px;
+        overflow-y: auto;
+        border: 2px solid #667eea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
 
       #name option {
@@ -112,14 +120,6 @@
         color: white;
       }
 
-      #name.hidden {
-        display: none;
-      }
-
-      #name.collapsed {
-        display: none;
-      }
-
       /* iOS Safari 호환성 */
       @supports (-webkit-overflow-scrolling: touch) {
         #name {
@@ -136,28 +136,16 @@
       @media (max-width: 768px) {
         .select-wrapper {
           position: relative;
-          overflow: visible;
         }
 
         #name {
           position: absolute;
           width: 100%;
           left: 0;
-          top: calc(100% + 8px);
+          top: 100%;
           z-index: 1000;
           background: white;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          max-height: 250px;
-          margin-top: 0;
-          border: 2px solid #667eea;
-        }
-
-        #name.collapsed {
-          display: none;
-        }
-
-        #nameSearch.selected {
-          background: white;
+          margin-top: 5px;
         }
 
         .container {
@@ -529,16 +517,14 @@
             searchInput.classList.add("selected");
 
             // 드롭다운 숨김
-            select.classList.add("collapsed");
-            select.style.display = "none";
+            select.classList.remove("show");
           }
         });
 
         // 검색창 포커스 시 전체 목록 표시
         searchInput.addEventListener("focus", () => {
-          select.classList.remove("collapsed");
+          select.classList.add("show");
           select.size = 5; // 목록 확장
-          select.style.display = "block"; // 명시적으로 표시
           
           if (searchInput.value && select.value) {
             // 이미 선택된 값이 있으면 검색창 비우기
@@ -558,16 +544,14 @@
           }
         });
 
-        // 초기 상태: 모바일에서는 셀렉트박스 숨김
-        select.classList.add("collapsed");
-        select.style.display = "none";
+        // 초기 상태: 드롭다운 숨김
+        select.classList.remove("show");
 
         // 화면 밖 클릭 시 셀렉트박스 닫기
         document.addEventListener("click", (e) => {
           const wrapper = document.querySelector(".select-wrapper");
           if (wrapper && !wrapper.contains(e.target)) {
-            select.classList.add("collapsed");
-            select.style.display = "none";
+            select.classList.remove("show");
           }
         });
 
