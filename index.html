@@ -60,8 +60,6 @@
 
       .form-group {
         margin-bottom: 20px;
-        position: relative;
-        clear: both;
       }
 
       label {
@@ -70,92 +68,74 @@
         color: #333;
         font-weight: 500;
         font-size: 14px;
-        clear: both;
       }
 
       .select-wrapper {
         position: relative;
-        margin-bottom: 10px;
       }
 
       #nameSearch {
         margin-bottom: 8px;
-        -webkit-appearance: none;
-        appearance: none;
       }
 
-      .suggestions {
-        position: absolute;
+      #name {
         width: 100%;
-        max-height: 0;
-        overflow: hidden;
-        background: white;
-        border: 0;
-        border-radius: 10px;
-        margin-top: 5px;
-        z-index: 1000;
-        transition: max-height 0.2s ease, border 0.2s ease;
-        box-shadow: none;
-      }
-
-      .suggestions.show {
-        max-height: 250px;
+        max-height: 200px;
         overflow-y: auto;
-        border: 2px solid #667eea;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 0;
+        background: white;
       }
 
-      .suggestion-item {
+      #name option {
         padding: 12px 15px;
         cursor: pointer;
         border-bottom: 1px solid #f0f0f0;
-        transition: background 0.2s;
       }
 
-      .suggestion-item:last-child {
-        border-bottom: none;
-      }
-
-      .suggestion-item:hover {
+      #name option:hover {
         background: #f8f9fa;
       }
 
-      .suggestion-item:active {
+      #name option:checked,
+      #name option:focus {
         background: #667eea;
         color: white;
       }
 
-      .suggestion-item .name {
-        font-weight: 600;
-        color: #333;
-      }
-
-      .suggestion-item .details {
-        font-size: 12px;
-        color: #666;
-        margin-top: 2px;
-      }
-
-      .suggestion-item:active .name,
-      .suggestion-item:active .details {
-        color: white;
-      }
-
-      /* iOS Safari 호환성 */
-      @supports (-webkit-overflow-scrolling: touch) {
-        .suggestions {
-          -webkit-overflow-scrolling: touch;
-        }
+      #name.hidden {
+        display: none;
       }
 
       /* 모바일 반응형 */
       @media (max-width: 768px) {
-        .container {
-          padding: 20px;
+        .select-wrapper {
+          position: relative;
         }
 
-        body {
-          -webkit-text-size-adjust: 100%;
+        #name {
+          position: absolute;
+          width: 100%;
+          left: 0;
+          top: 100%;
+          z-index: 100;
+          background: white;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          max-height: 250px;
+          margin-top: 5px;
+        }
+
+        #name.collapsed {
+          display: none;
+        }
+
+        #nameSearch.selected {
+          background: white;
+        }
+
+        .container {
+          padding: 20px;
         }
       }
 
@@ -171,7 +151,6 @@
         -moz-appearance: none;
         appearance: none;
         line-height: normal;
-        position: relative;
       }
 
       input[type="date"]::-webkit-date-and-time-value {
@@ -180,14 +159,6 @@
 
       input[type="date"]::-webkit-calendar-picker-indicator {
         cursor: pointer;
-        opacity: 1;
-      }
-
-      /* iOS Safari 날짜 input 수정 */
-      @supports (-webkit-touch-callout: none) {
-        input[type="date"] {
-          min-height: 44px;
-        }
       }
 
       .required {
@@ -367,10 +338,10 @@
               id="nameSearch"
               placeholder="이름 검색..."
               autocomplete="off"
-              required
             />
-            <input type="hidden" id="selectedMemberId" required />
-            <div id="suggestions" class="suggestions"></div>
+            <select id="name" required size="5">
+              <option value="">선택해주세요</option>
+            </select>
             <div class="member-count" id="memberCount"></div>
           </div>
         </div>
@@ -455,123 +426,123 @@
     </div>
 
     <script>
-      // 자동완성 기능 설정
-      function setupAutocomplete() {
+      // 검색 기능 설정
+      function setupSearch() {
         const searchInput = document.getElementById("nameSearch");
-        const suggestionsDiv = document.getElementById("suggestions");
+        const select = document.getElementById("name");
         const memberCount = document.getElementById("memberCount");
-        const hiddenInput = document.getElementById("selectedMemberId");
-        let allMembers = [];
+        let allOptions = [];
 
-        // 모든 멤버 데이터 저장
-        window.setMembersData = function(members) {
-          allMembers = members;
-          memberCount.textContent = `총 ${members.length}명`;
-        };
+        // 모든 옵션 저장 (첫 번째 "선택해주세요" 제외)
+        function saveOptions() {
+          allOptions = Array.from(select.options).filter(
+            (opt) => opt.value !== ""
+          );
+        }
 
-        // 제안 목록 표시
-        function showSuggestions(members) {
-          suggestionsDiv.innerHTML = "";
-          
-          if (members.length === 0) {
-            suggestionsDiv.classList.remove("show");
-            return;
+        // 옵션 업데이트
+        function updateOptions(optionsToShow) {
+          // 기존 옵션 제거 (첫 번째 제외)
+          while (select.options.length > 1) {
+            select.remove(1);
           }
 
-          members.forEach((member) => {
-            const item = document.createElement("div");
-            item.className = "suggestion-item";
-            item.dataset.id = member.id;
-            item.dataset.name = member.name;
-            
-            let detailsText = [];
-            if (member.group) detailsText.push(member.group);
-            if (member.location) detailsText.push(member.location);
-            
-            item.innerHTML = `
-              <div class="name">${member.name}</div>
-              ${detailsText.length > 0 ? `<div class="details">${detailsText.join(' · ')}</div>` : ''}
-            `;
-            
-            item.addEventListener("click", () => {
-              selectMember(member);
-            });
-            
-            suggestionsDiv.appendChild(item);
+          // 필터링된 옵션 추가
+          optionsToShow.forEach((opt) => {
+            select.add(opt.cloneNode(true));
           });
 
-          suggestionsDiv.classList.add("show");
-          memberCount.textContent = `${members.length}명 표시 / 전체 ${allMembers.length}명`;
+          // 멤버 수 업데이트
+          memberCount.textContent = `${optionsToShow.length}명 표시 / 전체 ${allOptions.length}명`;
+
+          // 결과가 없으면 메시지 표시
+          if (optionsToShow.length === 0) {
+            const noResult = document.createElement("option");
+            noResult.textContent = "검색 결과 없음";
+            noResult.disabled = true;
+            select.add(noResult);
+            memberCount.textContent = `0명 표시 / 전체 ${allOptions.length}명`;
+          }
         }
 
-        // 멤버 선택
-        function selectMember(member) {
-          searchInput.value = member.name;
-          hiddenInput.value = member.id;
-          suggestionsDiv.classList.remove("show");
-          suggestionsDiv.innerHTML = "";
-        }
-
-        // 검색 입력 처리
+        // 검색 필터링
         searchInput.addEventListener("input", (e) => {
-          const searchTerm = e.target.value.trim().toLowerCase();
-          hiddenInput.value = ""; // 입력 중에는 선택 초기화
+          const searchTerm = e.target.value.toLowerCase().trim();
 
           if (searchTerm === "") {
-            suggestionsDiv.classList.remove("show");
-            memberCount.textContent = `총 ${allMembers.length}명`;
-            return;
-          }
-
-          // 검색어로 필터링
-          const filtered = allMembers.filter((m) =>
-            m.name.toLowerCase().includes(searchTerm)
-          );
-
-          if (filtered.length === 1) {
-            // 정확히 1명만 매칭되면 자동 선택
-            selectMember(filtered[0]);
-          } else if (filtered.length > 1) {
-            // 여러 명이면 선택 목록 표시
-            showSuggestions(filtered);
+            // 검색어 없으면 전체 표시
+            updateOptions(allOptions);
           } else {
-            // 결과 없음
-            suggestionsDiv.innerHTML = '<div class="suggestion-item">검색 결과 없음</div>';
-            suggestionsDiv.classList.add("show");
-            memberCount.textContent = `0명 표시 / 전체 ${allMembers.length}명`;
+            // 검색어로 필터링
+            const filtered = allOptions.filter((opt) =>
+              opt.textContent.toLowerCase().includes(searchTerm)
+            );
+            updateOptions(filtered);
           }
         });
 
-        // 포커스 시 전체 목록 표시
-        searchInput.addEventListener("focus", () => {
-          if (searchInput.value.trim() === "") {
-            showSuggestions(allMembers);
-          }
-        });
+        // 옵션 선택 시 검색창에 표시하고 선택 완료
+        select.addEventListener("change", (e) => {
+          if (e.target.value) {
+            const selectedText =
+              e.target.options[e.target.selectedIndex].textContent;
+            searchInput.value = selectedText;
+            searchInput.classList.add("selected");
 
-        // Enter 키로 첫 번째 항목 선택
-        searchInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const firstItem = suggestionsDiv.querySelector(".suggestion-item");
-            if (firstItem && firstItem.dataset.id) {
-              const member = allMembers.find(m => m.id === firstItem.dataset.id);
-              if (member) selectMember(member);
+            // 모바일에서는 셀렉트박스 숨김
+            if (window.innerWidth <= 768) {
+              select.classList.add("collapsed");
+            } else {
+              select.size = 1; // 데스크탑에서는 크기만 축소
             }
           }
         });
 
-        // 화면 밖 클릭 시 닫기
+        // 검색창 포커스 시 전체 목록 표시
+        searchInput.addEventListener("focus", () => {
+          select.classList.remove("collapsed");
+          select.size = 5; // 목록 확장
+          if (searchInput.value && select.value) {
+            // 이미 선택된 값이 있으면 검색창 비우기
+            searchInput.value = "";
+            updateOptions(allOptions);
+          }
+        });
+
+        // 검색창에서 Enter 키 누르면 첫 번째 항목 선택
+        searchInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (select.options.length > 1) {
+              select.selectedIndex = 1;
+              select.dispatchEvent(new Event("change"));
+            }
+          }
+        });
+
+        // 초기 상태: 모바일에서는 셀렉트박스 숨김
+        if (window.innerWidth <= 768) {
+          select.classList.add("collapsed");
+        }
+
+        // 화면 밖 클릭 시 셀렉트박스 닫기
         document.addEventListener("click", (e) => {
           const wrapper = document.querySelector(".select-wrapper");
           if (wrapper && !wrapper.contains(e.target)) {
-            suggestionsDiv.classList.remove("show");
+            if (window.innerWidth <= 768) {
+              select.classList.add("collapsed");
+            }
           }
         });
+
+        // 초기 옵션 저장
+        saveOptions();
       }
 
       // 멤버 목록 로드
       async function loadMembers() {
+        const select = document.getElementById("name");
+
         try {
           const response = await fetch("/.netlify/functions/get-members");
 
@@ -582,20 +553,36 @@
           const data = await response.json();
 
           if (data.members && data.members.length > 0) {
+            data.members.forEach((member) => {
+              const option = document.createElement("option");
+              option.value = member.id;
+              option.textContent = member.name;
+              option.dataset.name = member.name;
+              select.appendChild(option);
+            });
             console.log("✅ 멤버 로드 성공:", data.members.length);
-            
-            // 자동완성 시스템에 멤버 데이터 전달
-            window.setMembersData(data.members);
-            
-            // 자동완성 기능 활성화
-            setupAutocomplete();
-          } else {
-            throw new Error("멤버 데이터가 비어있습니다.");
+
+            // 멤버 수 표시
+            document.getElementById(
+              "memberCount"
+            ).textContent = `총 ${data.members.length}명`;
+
+            // 검색 기능 활성화
+            setupSearch();
+
+            return;
           }
         } catch (error) {
           console.error("❌ 멤버 로드 실패:", error);
-          alert("멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.");
         }
+
+        // 실패 시: 에러 메시지 표시
+        alert("멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.");
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "멤버 로드 실패 - 관리자에게 문의";
+        option.disabled = true;
+        select.appendChild(option);
       }
 
       // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
@@ -611,19 +598,12 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const nameSearch = document.getElementById("nameSearch");
-          const memberId = document.getElementById("selectedMemberId").value;
-          
-          // 멤버 선택 확인
-          if (!memberId) {
-            alert("이름을 선택해주세요.");
-            nameSearch.focus();
-            return;
-          }
+          const nameSelect = document.getElementById("name");
+          const selectedOption = nameSelect.options[nameSelect.selectedIndex];
 
           const formData = {
-            memberId: memberId,
-            name: nameSearch.value,
+            memberId: nameSelect.value, // 선택된 멤버 ID
+            name: selectedOption.dataset.name || selectedOption.textContent, // 멤버 이름 (표시용)
             date: document.getElementById("date").value,
             duration: document.getElementById("duration").value,
             title: document.getElementById("title").value,
