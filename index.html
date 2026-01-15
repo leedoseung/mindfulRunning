@@ -589,15 +589,13 @@
             
             // 자동완성 기능 활성화
             setupAutocomplete();
-
-            return;
+          } else {
+            throw new Error("멤버 데이터가 비어있습니다.");
           }
         } catch (error) {
           console.error("❌ 멤버 로드 실패:", error);
+          alert("멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.");
         }
-
-        // 실패 시: 에러 메시지 표시
-        alert("멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.");
       }
 
       // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
