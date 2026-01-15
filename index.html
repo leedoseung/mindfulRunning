@@ -1,545 +1,639 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>마인드풀러닝 기록</title>
-    
-    <!-- 파비콘 -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
+
+    <!-- 파비콘 및 홈화면 아이콘 -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="마인드풀러닝" />
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 28px;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        position: relative;
+        clear: both;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+        clear: both;
+      }
+
+      .select-wrapper {
+        position: relative;
+        margin-bottom: 10px;
+      }
+
+      #nameSearch {
+        margin-bottom: 8px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      .suggestions {
+        position: absolute;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        background: white;
+        border: 0;
+        border-radius: 10px;
+        margin-top: 5px;
+        z-index: 1000;
+        transition: max-height 0.2s ease, border 0.2s ease;
+        box-shadow: none;
+      }
+
+      .suggestions.show {
+        max-height: 250px;
+        overflow-y: auto;
+        border: 2px solid #667eea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .suggestion-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+      }
+
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .suggestion-item:hover {
+        background: #f8f9fa;
+      }
+
+      .suggestion-item:active {
+        background: #667eea;
+        color: white;
+      }
+
+      .suggestion-item .name {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .suggestion-item .details {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .suggestion-item:active .name,
+      .suggestion-item:active .details {
+        color: white;
+      }
+
+      /* iOS Safari 호환성 */
+      @supports (-webkit-overflow-scrolling: touch) {
+        .suggestions {
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      /* 모바일 반응형 */
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          -webkit-text-size-adjust: 100%;
         }
+      }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
+      .member-count {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
 
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-align: center;
-        }
+      /* 날짜 input 개선 */
+      input[type="date"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        line-height: normal;
+        position: relative;
+      }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+      input[type="date"]::-webkit-date-and-time-value {
+        text-align: left;
+      }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 1;
+      }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .select-wrapper {
-            position: relative;
-        }
-
-        #nameSearch {
-            margin-bottom: 8px;
-        }
-
-        #name {
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 0;
-            background: white;
-        }
-
-        #name option {
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        #name option:hover {
-            background: #f8f9fa;
-        }
-
-        #name option:checked,
-        #name option:focus {
-            background: #667eea;
-            color: white;
-        }
-
-        #name.hidden {
-            display: none;
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            #name {
-                position: absolute;
-                width: calc(100% - 30px);
-                z-index: 100;
-                background: white;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                max-height: 250px;
-                margin-top: 5px;
-            }
-            
-            #name.collapsed {
-                display: none;
-            }
-            
-            #nameSearch.selected {
-                background: white;
-            }
-        }
-
-        .member-count {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        /* 날짜 input 개선 */
+      /* iOS Safari 날짜 input 수정 */
+      @supports (-webkit-touch-callout: none) {
         input[type="date"] {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            line-height: normal;
+          min-height: 44px;
         }
+      }
 
-        input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-        }
+      .required {
+        color: #e74c3c;
+      }
 
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-        }
+      input[type="text"],
+      input[type="date"],
+      input[type="number"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+        font-family: inherit;
+      }
 
-        .required {
-            color: #e74c3c;
-        }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
 
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-            font-family: inherit;
-        }
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+      .description {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
 
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
+      button {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 10px;
+      }
 
-        .description {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
-        }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
 
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
-        }
+      button:active {
+        transform: translateY(0);
+      }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
 
-        button:active {
-            transform: translateY(0);
-        }
+      .result-container {
+        display: none;
+        margin-top: 30px;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px solid #667eea;
+      }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+      .result-container.show {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+      }
 
-        .result-container {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid #667eea;
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        .result-container.show {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
+      .result-text {
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+      }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+      .copy-button {
+        background: #10b981;
+        margin-bottom: 10px;
+      }
 
-        .result-text {
-            white-space: pre-wrap;
-            font-size: 14px;
-            line-height: 1.8;
-            color: #333;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-        }
+      .copy-button:hover {
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+      }
 
-        .copy-button {
-            background: #10b981;
-        }
+      .leaderboard-button {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
 
-        .copy-button:hover {
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-        }
+      .leaderboard-button:hover {
+        box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+      }
 
-        .success-message {
-            text-align: center;
-            color: #10b981;
-            font-weight: 600;
-            margin-top: 10px;
-            display: none;
-        }
+      .success-message {
+        text-align: center;
+        color: #10b981;
+        font-weight: 600;
+        margin-top: 10px;
+        display: none;
+      }
 
-        .success-message.show {
-            display: block;
-            animation: fadeIn 0.3s ease-out;
-        }
+      .success-message.show {
+        display: block;
+        animation: fadeIn 0.3s ease-out;
+      }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
+        to {
+          opacity: 1;
+        }
+      }
 
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
-        }
+      .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+        display: none;
+      }
 
-        .error-message.show {
-            display: block;
-        }
+      .error-message.show {
+        display: block;
+      }
 
-        .loading {
-            text-align: center;
-            color: #667eea;
-            display: none;
-        }
+      .loading {
+        text-align: center;
+        color: #667eea;
+        display: none;
+      }
 
-        .loading.show {
-            display: block;
-        }
+      .loading.show {
+        display: block;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
-        <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
+      <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
+      <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
 
-        <form id="runningForm">
-            <div class="form-group">
-                <label>이름 <span class="required">*</span></label>
-                <div class="select-wrapper">
-                    <input 
-                        type="text" 
-                        id="nameSearch" 
-                        placeholder="이름 검색..." 
-                        autocomplete="off"
-                    >
-                    <select id="name" required size="5">
-                        <option value="">선택해주세요</option>
-                    </select>
-                    <div class="member-count" id="memberCount"></div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>달린 날짜 <span class="required">*</span></label>
-                <input type="date" id="date" required>
-            </div>
-
-            <div class="form-group">
-                <label>달린 시간(분) <span class="required">*</span></label>
-                <input type="number" id="duration" min="1" placeholder="예: 30" required>
-            </div>
-
-            <div class="form-group">
-                <label>오늘의 한줄 제목/Story <span class="required">*</span></label>
-                <input type="text" id="title" placeholder="오늘의 달리기를 한 문장으로" required>
-            </div>
-
-            <div class="form-group">
-                <label>달리기 전 생각/느낌 <span class="required">*</span></label>
-                <textarea id="before" placeholder="문 밖을 나서기 전, 몸과 마음은 어떤 상태였나요?" required></textarea>
-                <p class="description">피로, 기대, 저항, 설렘... 무엇이든 괜찮습니다</p>
-            </div>
-
-            <div class="form-group">
-                <label>달리기 중 생각/느낌 <span class="required">*</span></label>
-                <textarea id="during" placeholder="달리는 동안 무엇을 알아차렸나요?" required></textarea>
-                <p class="description">발이 땅에 닿는 감각, 호흡의 리듬, 스쳐간 생각들...</p>
-            </div>
-
-            <div class="form-group">
-                <label>달리기 후 생각/느낌 <span class="required">*</span></label>
-                <textarea id="after" placeholder="멈추고 난 뒤의 나는 어땠나요?" required></textarea>
-                <p class="description">달리기 전의 나와 무엇이 달라졌나요?</p>
-            </div>
-
-            <button type="submit">📝 기록하기</button>
-            <div class="loading">⏳ Notion에 저장 중...</div>
-            <div class="error-message"></div>
-        </form>
-
-        <div class="result-container" id="resultContainer">
-            <div class="result-text" id="resultText"></div>
-            <button class="copy-button" onclick="copyToClipboard()">📋 복사하기</button>
-            <div class="success-message" id="successMessage">✅ 복사되었습니다!</div>
+      <form id="runningForm">
+        <div class="form-group">
+          <label>이름 <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <input
+              type="text"
+              id="nameSearch"
+              placeholder="이름 검색..."
+              autocomplete="off"
+              required
+            />
+            <input type="hidden" id="selectedMemberId" required />
+            <div id="suggestions" class="suggestions"></div>
+            <div class="member-count" id="memberCount"></div>
+          </div>
         </div>
+
+        <div class="form-group">
+          <label>달린 날짜 <span class="required">*</span></label>
+          <input type="date" id="date" required />
+        </div>
+
+        <div class="form-group">
+          <label>달린 시간(분) <span class="required">*</span></label>
+          <input
+            type="number"
+            id="duration"
+            min="1"
+            placeholder="예: 30"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>오늘의 한줄 제목/Story <span class="required">*</span></label>
+          <input
+            type="text"
+            id="title"
+            placeholder="오늘의 달리기를 한 문장으로"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>달리기 전 생각/느낌 <span class="required">*</span></label>
+          <textarea
+            id="before"
+            placeholder="문 밖을 나서기 전, 몸과 마음은 어떤 상태였나요?"
+            required
+          ></textarea>
+          <p class="description">
+            피로, 기대, 저항, 설렘... 무엇이든 괜찮습니다
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>달리기 중 생각/느낌 <span class="required">*</span></label>
+          <textarea
+            id="during"
+            placeholder="달리는 동안 무엇을 알아차렸나요?"
+            required
+          ></textarea>
+          <p class="description">
+            발이 땅에 닿는 감각, 호흡의 리듬, 스쳐간 생각들...
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>달리기 후 생각/느낌 <span class="required">*</span></label>
+          <textarea
+            id="after"
+            placeholder="멈추고 난 뒤의 나는 어땠나요?"
+            required
+          ></textarea>
+          <p class="description">달리기 전의 나와 무엇이 달라졌나요?</p>
+        </div>
+
+        <button type="submit">📝 기록하기</button>
+        <div class="loading">⏳ Notion에 저장 중...</div>
+        <div class="error-message"></div>
+      </form>
+
+      <div class="result-container" id="resultContainer">
+        <div class="result-text" id="resultText"></div>
+        <button class="copy-button" onclick="copyToClipboard()">
+          📋 복사하기
+        </button>
+        <button class="leaderboard-button" onclick="goToLeaderboard()">
+          🏆 리더보드 보러가기
+        </button>
+        <div class="success-message" id="successMessage">
+          ✅ 복사되었습니다!
+        </div>
+      </div>
     </div>
 
     <script>
-        // 검색 기능 설정
-        function setupSearch() {
-            const searchInput = document.getElementById('nameSearch');
-            const select = document.getElementById('name');
-            const memberCount = document.getElementById('memberCount');
-            let allOptions = [];
+      // 자동완성 기능 설정
+      function setupAutocomplete() {
+        const searchInput = document.getElementById("nameSearch");
+        const suggestionsDiv = document.getElementById("suggestions");
+        const memberCount = document.getElementById("memberCount");
+        const hiddenInput = document.getElementById("selectedMemberId");
+        let allMembers = [];
 
-            // 모든 옵션 저장 (첫 번째 "선택해주세요" 제외)
-            function saveOptions() {
-                allOptions = Array.from(select.options).filter(opt => opt.value !== '');
-            }
+        // 모든 멤버 데이터 저장
+        window.setMembersData = function(members) {
+          allMembers = members;
+          memberCount.textContent = `총 ${members.length}명`;
+        };
 
-            // 옵션 업데이트
-            function updateOptions(optionsToShow) {
-                // 기존 옵션 제거 (첫 번째 제외)
-                while (select.options.length > 1) {
-                    select.remove(1);
-                }
+        // 제안 목록 표시
+        function showSuggestions(members) {
+          suggestionsDiv.innerHTML = "";
+          
+          if (members.length === 0) {
+            suggestionsDiv.classList.remove("show");
+            return;
+          }
 
-                // 필터링된 옵션 추가
-                optionsToShow.forEach(opt => {
-                    select.add(opt.cloneNode(true));
-                });
-
-                // 멤버 수 업데이트
-                memberCount.textContent = `${optionsToShow.length}명 표시 / 전체 ${allOptions.length}명`;
-
-                // 결과가 없으면 메시지 표시
-                if (optionsToShow.length === 0) {
-                    const noResult = document.createElement('option');
-                    noResult.textContent = '검색 결과 없음';
-                    noResult.disabled = true;
-                    select.add(noResult);
-                    memberCount.textContent = `0명 표시 / 전체 ${allOptions.length}명`;
-                }
-            }
-
-            // 검색 필터링
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                
-                if (searchTerm === '') {
-                    // 검색어 없으면 전체 표시
-                    updateOptions(allOptions);
-                } else {
-                    // 검색어로 필터링
-                    const filtered = allOptions.filter(opt => 
-                        opt.textContent.toLowerCase().includes(searchTerm)
-                    );
-                    updateOptions(filtered);
-                }
+          members.forEach((member) => {
+            const item = document.createElement("div");
+            item.className = "suggestion-item";
+            item.dataset.id = member.id;
+            item.dataset.name = member.name;
+            
+            let detailsText = [];
+            if (member.group) detailsText.push(member.group);
+            if (member.location) detailsText.push(member.location);
+            
+            item.innerHTML = `
+              <div class="name">${member.name}</div>
+              ${detailsText.length > 0 ? `<div class="details">${detailsText.join(' · ')}</div>` : ''}
+            `;
+            
+            item.addEventListener("click", () => {
+              selectMember(member);
             });
+            
+            suggestionsDiv.appendChild(item);
+          });
 
-            // 옵션 선택 시 검색창에 표시하고 선택 완료
-            select.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    const selectedText = e.target.options[e.target.selectedIndex].textContent;
-                    searchInput.value = selectedText;
-                    searchInput.classList.add('selected');
-                    
-                    // 모바일에서는 셀렉트박스 숨김
-                    if (window.innerWidth <= 768) {
-                        select.classList.add('collapsed');
-                    } else {
-                        select.size = 1; // 데스크탑에서는 크기만 축소
-                    }
-                }
-            });
-
-            // 검색창 포커스 시 전체 목록 표시
-            searchInput.addEventListener('focus', () => {
-                select.classList.remove('collapsed');
-                select.size = 5; // 목록 확장
-                if (searchInput.value && select.value) {
-                    // 이미 선택된 값이 있으면 검색창 비우기
-                    searchInput.value = '';
-                    updateOptions(allOptions);
-                }
-            });
-
-            // 검색창에서 Enter 키 누르면 첫 번째 항목 선택
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (select.options.length > 1) {
-                        select.selectedIndex = 1;
-                        select.dispatchEvent(new Event('change'));
-                    }
-                }
-            });
-
-            // 초기 상태: 모바일에서는 셀렉트박스 숨김
-            if (window.innerWidth <= 768) {
-                select.classList.add('collapsed');
-            }
-
-            // 화면 밖 클릭 시 셀렉트박스 닫기
-            document.addEventListener('click', (e) => {
-                const wrapper = document.querySelector('.select-wrapper');
-                if (wrapper && !wrapper.contains(e.target)) {
-                    if (window.innerWidth <= 768) {
-                        select.classList.add('collapsed');
-                    }
-                }
-            });
-
-            // 초기 옵션 저장
-            saveOptions();
+          suggestionsDiv.classList.add("show");
+          memberCount.textContent = `${members.length}명 표시 / 전체 ${allMembers.length}명`;
         }
 
-        // 멤버 목록 로드
-        async function loadMembers() {
-            const select = document.getElementById('name');
-            
-            try {
-                const response = await fetch('/.netlify/functions/get-members');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.members && data.members.length > 0) {
-                    data.members.forEach(member => {
-                        const option = document.createElement('option');
-                        option.value = member.id;
-                        option.textContent = member.name;
-                        option.dataset.name = member.name;
-                        select.appendChild(option);
-                    });
-                    console.log('✅ 멤버 로드 성공:', data.members.length);
-                    
-                    // 멤버 수 표시
-                    document.getElementById('memberCount').textContent = `총 ${data.members.length}명`;
-                    
-                    // 검색 기능 활성화
-                    setupSearch();
-                    
-                    return;
-                }
-            } catch (error) {
-                console.error('❌ 멤버 로드 실패:', error);
-            }
-            
-            // 실패 시: 에러 메시지 표시
-            alert('멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.');
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = '멤버 로드 실패 - 관리자에게 문의';
-            option.disabled = true;
-            select.appendChild(option);
+        // 멤버 선택
+        function selectMember(member) {
+          searchInput.value = member.name;
+          hiddenInput.value = member.id;
+          suggestionsDiv.classList.remove("show");
+          suggestionsDiv.innerHTML = "";
         }
 
-        // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
-        window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').value = today;
-            loadMembers();
+        // 검색 입력 처리
+        searchInput.addEventListener("input", (e) => {
+          const searchTerm = e.target.value.trim().toLowerCase();
+          hiddenInput.value = ""; // 입력 중에는 선택 초기화
+
+          if (searchTerm === "") {
+            suggestionsDiv.classList.remove("show");
+            memberCount.textContent = `총 ${allMembers.length}명`;
+            return;
+          }
+
+          // 검색어로 필터링
+          const filtered = allMembers.filter((m) =>
+            m.name.toLowerCase().includes(searchTerm)
+          );
+
+          if (filtered.length === 1) {
+            // 정확히 1명만 매칭되면 자동 선택
+            selectMember(filtered[0]);
+          } else if (filtered.length > 1) {
+            // 여러 명이면 선택 목록 표시
+            showSuggestions(filtered);
+          } else {
+            // 결과 없음
+            suggestionsDiv.innerHTML = '<div class="suggestion-item">검색 결과 없음</div>';
+            suggestionsDiv.classList.add("show");
+            memberCount.textContent = `0명 표시 / 전체 ${allMembers.length}명`;
+          }
         });
 
-        // 폼 제출
-        document.getElementById('runningForm').addEventListener('submit', async (e) => {
+        // 포커스 시 전체 목록 표시
+        searchInput.addEventListener("focus", () => {
+          if (searchInput.value.trim() === "") {
+            showSuggestions(allMembers);
+          }
+        });
+
+        // Enter 키로 첫 번째 항목 선택
+        searchInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
             e.preventDefault();
+            const firstItem = suggestionsDiv.querySelector(".suggestion-item");
+            if (firstItem && firstItem.dataset.id) {
+              const member = allMembers.find(m => m.id === firstItem.dataset.id);
+              if (member) selectMember(member);
+            }
+          }
+        });
 
-            const nameSelect = document.getElementById('name');
-            const selectedOption = nameSelect.options[nameSelect.selectedIndex];
+        // 화면 밖 클릭 시 닫기
+        document.addEventListener("click", (e) => {
+          const wrapper = document.querySelector(".select-wrapper");
+          if (wrapper && !wrapper.contains(e.target)) {
+            suggestionsDiv.classList.remove("show");
+          }
+        });
+      }
 
-            const formData = {
-                memberId: nameSelect.value, // 선택된 멤버 ID
-                name: selectedOption.dataset.name || selectedOption.textContent, // 멤버 이름 (표시용)
-                date: document.getElementById('date').value,
-                duration: document.getElementById('duration').value,
-                title: document.getElementById('title').value,
-                before: document.getElementById('before').value,
-                during: document.getElementById('during').value,
-                after: document.getElementById('after').value
-            };
+      // 멤버 목록 로드
+      async function loadMembers() {
+        try {
+          const response = await fetch("/.netlify/functions/get-members");
 
-            // 결과 텍스트 생성
-            const resultText = `📝 오늘의 마인드풀러닝 기록
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.members && data.members.length > 0) {
+            console.log("✅ 멤버 로드 성공:", data.members.length);
+            
+            // 자동완성 시스템에 멤버 데이터 전달
+            window.setMembersData(data.members);
+            
+            // 자동완성 기능 활성화
+            setupAutocomplete();
+          } else {
+            throw new Error("멤버 데이터가 비어있습니다.");
+          }
+        } catch (error) {
+          console.error("❌ 멤버 로드 실패:", error);
+          alert("멤버 목록을 불러오는데 실패했습니다.\n관리자에게 문의하세요.");
+        }
+      }
+
+      // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
+      window.addEventListener("DOMContentLoaded", () => {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").value = today;
+        loadMembers();
+      });
+
+      // 폼 제출
+      document
+        .getElementById("runningForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const nameSearch = document.getElementById("nameSearch");
+          const memberId = document.getElementById("selectedMemberId").value;
+          
+          // 멤버 선택 확인
+          if (!memberId) {
+            alert("이름을 선택해주세요.");
+            nameSearch.focus();
+            return;
+          }
+
+          const formData = {
+            memberId: memberId,
+            name: nameSearch.value,
+            date: document.getElementById("date").value,
+            duration: document.getElementById("duration").value,
+            title: document.getElementById("title").value,
+            before: document.getElementById("before").value,
+            during: document.getElementById("during").value,
+            after: document.getElementById("after").value,
+          };
+
+          // 결과 텍스트 생성
+          const resultText = `📝 오늘의 마인드풀러닝 기록
 
 ${formData.name} | ${formData.date} | ${formData.duration}분
 
@@ -549,61 +643,65 @@ ${formData.name} | ${formData.date} | ${formData.duration}분
 🏃‍♂️ 달리기 중: ${formData.during}
 ✨ 달리기 후: ${formData.after}`;
 
-            // 결과 표시
-            document.getElementById('resultText').textContent = resultText;
-            document.getElementById('resultContainer').classList.add('show');
+          // 결과 표시
+          document.getElementById("resultText").textContent = resultText;
+          document.getElementById("resultContainer").classList.add("show");
 
-            // Notion에 저장
-            await saveToNotion(formData);
+          // Notion에 저장
+          await saveToNotion(formData);
         });
 
-        // Notion 저장 (Netlify Function 사용)
-        async function saveToNotion(formData) {
-            const loadingEl = document.querySelector('.loading');
-            const errorEl = document.querySelector('.error-message');
-            const submitBtn = document.querySelector('button[type="submit"]');
+      // Notion 저장 (Netlify Function 사용)
+      async function saveToNotion(formData) {
+        const loadingEl = document.querySelector(".loading");
+        const errorEl = document.querySelector(".error-message");
+        const submitBtn = document.querySelector('button[type="submit"]');
 
-            loadingEl.classList.add('show');
-            errorEl.classList.remove('show');
-            submitBtn.disabled = true;
+        loadingEl.classList.add("show");
+        errorEl.classList.remove("show");
+        submitBtn.disabled = true;
 
-            try {
-                const response = await fetch('/.netlify/functions/save-to-notion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+        try {
+          const response = await fetch("/.netlify/functions/save-to-notion", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
 
-                const data = await response.json();
+          const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Notion 저장 실패');
-                }
+          if (!response.ok) {
+            throw new Error(data.error || "Notion 저장 실패");
+          }
 
-                loadingEl.classList.remove('show');
-                console.log('✅ Notion에 저장 완료!');
-
-            } catch (error) {
-                console.error('Notion 저장 에러:', error);
-                loadingEl.classList.remove('show');
-                errorEl.textContent = `⚠️ ${error.message}`;
-                errorEl.classList.add('show');
-            } finally {
-                submitBtn.disabled = false;
-            }
+          loadingEl.classList.remove("show");
+          console.log("✅ Notion에 저장 완료!");
+        } catch (error) {
+          console.error("Notion 저장 에러:", error);
+          loadingEl.classList.remove("show");
+          errorEl.textContent = `⚠️ ${error.message}`;
+          errorEl.classList.add("show");
+        } finally {
+          submitBtn.disabled = false;
         }
+      }
 
-        // 클립보드 복사
-        function copyToClipboard() {
-            const text = document.getElementById('resultText').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const msg = document.getElementById('successMessage');
-                msg.classList.add('show');
-                setTimeout(() => msg.classList.remove('show'), 2000);
-            });
-        }
+      // 클립보드 복사
+      function copyToClipboard() {
+        const text = document.getElementById("resultText").textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const msg = document.getElementById("successMessage");
+          msg.classList.add("show");
+          setTimeout(() => msg.classList.remove("show"), 2000);
+        });
+      }
+
+      // 리더보드 페이지로 이동
+      function goToLeaderboard() {
+        window.location.href = "/leaderboard.html";
+      }
     </script>
-</body>
+  </body>
 </html>
