@@ -55,10 +55,11 @@ exports.handler = async (event, context) => {
         group: props["그룹"]?.select?.name || "",
         location: props["주활동"]?.select?.name || "",
         generation: props["기수"]?.select?.name || "",
-        instaId: props["인스타ID"]?.rich_text?.[0]?.text?.content || 
-                 props["@인스타ID"]?.rich_text?.[0]?.text?.content ||
-                 props["인스타"]?.rich_text?.[0]?.text?.content ||
-                 "",
+        instaId:
+          props["인스타ID"]?.rich_text?.[0]?.text?.content ||
+          props["@인스타ID"]?.rich_text?.[0]?.text?.content ||
+          props["인스타"]?.rich_text?.[0]?.text?.content ||
+          "",
         id: page.id,
       };
     });
