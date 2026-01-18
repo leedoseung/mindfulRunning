@@ -493,7 +493,7 @@
         const html = `
           <h2 style="color: #667eea; margin-bottom: 20px; text-align: center;">🏆 실시간 리더보드</h2>
           <div style="max-height: 600px; overflow-y: auto;">
-            <div style="display: grid; grid-template-columns: 0.7fr 50px 60px 70px 70px 80px; gap: 8px; padding: 15px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0;">
+            <div style="display: grid; grid-template-columns: 0.8fr 45px 55px 55px 70px 70px; gap: 6px; padding: 12px 15px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0; font-size: 12px;">
               <div>이름</div>
               <div style="text-align: center;">횟수</div>
               <div style="text-align: center;">시간(분)</div>
@@ -505,9 +505,8 @@
               .slice(0, 20)
               .map(
                 (member) => `
-              <div style="display: grid; grid-template-columns: 0.7fr 50px 60px 70px 70px 80px; gap: 8px; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 12px;">
+              <div style="display: grid; grid-template-columns: 0.8fr 45px 55px 55px 70px 70px; gap: 6px; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 12px;">
                 <div style="font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${member.name}</div>
-                <div style="text-align: center; color: #667eea; font-weight: 600; font-size: 12px;">${member.count}</div>
                 <div style="text-align: center; color: #667eea; font-weight: 600; font-size: 12px;">${member.count}</div>
                 <div style="text-align: center; color: #667eea; font-weight: 600; font-size: 12px;">${Math.ceil(member.totalTime)}</div>
                 <div style="text-align: center; color: #666; background: #f5f5f5; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${member.group || "-"}</div>
