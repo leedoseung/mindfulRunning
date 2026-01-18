@@ -42,11 +42,17 @@ exports.handler = async (event, context) => {
     }
 
     // 멤버 데이터 파싱
-    const members = data.results.map((page) => {
+    const members = data.results.map((page, index) => {
       const props = page.properties;
 
-      // 디버깅: 모든 필드명 출력
-      console.log("Available fields:", Object.keys(props));
+      // 첫 번째 항목만 모든 필드 로깅 (디버깅용)
+      if (index === 0) {
+        console.log("=== FIRST MEMBER PROPERTIES ===");
+        Object.keys(props).forEach((key) => {
+          console.log(`Field: "${key}"`, props[key]);
+        });
+        console.log("================================");
+      }
 
       return {
         name: props.Name?.title?.[0]?.text?.content || "Unknown",
@@ -59,6 +65,8 @@ exports.handler = async (event, context) => {
           props["인스타ID"]?.rich_text?.[0]?.text?.content ||
           props["@인스타ID"]?.rich_text?.[0]?.text?.content ||
           props["인스타"]?.rich_text?.[0]?.text?.content ||
+          props["Instagram"]?.rich_text?.[0]?.text?.content ||
+          props["Insta"]?.rich_text?.[0]?.text?.content ||
           "",
         id: page.id,
       };
