@@ -172,8 +172,9 @@
       .name-cell {
         font-weight: 600;
         color: #333;
-        white-space: normal;
-        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       /* 숫자 열들 */
@@ -316,8 +317,9 @@
           min-width: 0;
           font-weight: 600;
           font-size: 11px;
-          white-space: normal;
-          word-break: break-word;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .number-cell {
@@ -371,8 +373,9 @@
 
         .name-cell {
           font-size: 10px;
-          white-space: normal;
-          word-break: break-word;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .number-cell {
