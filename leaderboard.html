@@ -116,6 +116,7 @@
         gap: 15px;
         align-items: center;
         user-select: none;
+        min-width: 800px;
       }
 
       /* 정렬 가능한 헤더 셀 */
@@ -147,6 +148,7 @@
         flex-direction: column;
         max-height: 600px;
         overflow-y: auto;
+        min-width: 800px;
       }
 
       .table-row {
@@ -158,6 +160,7 @@
         gap: 15px;
         align-items: center;
         transition: background-color 0.2s ease;
+        min-width: 800px;
       }
 
       .table-row:hover {
@@ -172,9 +175,6 @@
       .name-cell {
         font-weight: 600;
         color: #333;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
 
       /* 숫자 열들 */
@@ -311,15 +311,12 @@
           padding: 10px 8px;
           font-size: 11px;
           gap: 5px;
+          min-width: 800px;
         }
 
         .name-cell {
-          min-width: 0;
           font-weight: 600;
           font-size: 11px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .number-cell {
@@ -369,13 +366,11 @@
           padding: 8px 6px;
           font-size: 10px;
           gap: 4px;
+          min-width: 800px;
         }
 
         .name-cell {
           font-size: 10px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .number-cell {
