@@ -42,17 +42,8 @@ exports.handler = async (event, context) => {
     }
 
     // 멤버 데이터 파싱
-    const members = data.results.map((page, index) => {
+    const members = data.results.map((page) => {
       const props = page.properties;
-
-      // 첫 번째 항목만 모든 필드 로깅 (디버깅용)
-      if (index === 0) {
-        console.log("=== FIRST MEMBER PROPERTIES ===");
-        Object.keys(props).forEach((key) => {
-          console.log(`Field: "${key}"`, props[key]);
-        });
-        console.log("================================");
-      }
 
       return {
         name: props.Name?.title?.[0]?.text?.content || "Unknown",
@@ -61,13 +52,7 @@ exports.handler = async (event, context) => {
         group: props["그룹"]?.select?.name || "",
         location: props["주활동"]?.select?.name || "",
         generation: props["기수"]?.select?.name || "",
-        instaId:
-          props["인스타ID"]?.rich_text?.[0]?.text?.content ||
-          props["@인스타ID"]?.rich_text?.[0]?.text?.content ||
-          props["인스타"]?.rich_text?.[0]?.text?.content ||
-          props["Instagram"]?.rich_text?.[0]?.text?.content ||
-          props["Insta"]?.rich_text?.[0]?.text?.content ||
-          "",
+        instaId: props["@인스타ID"]?.select?.name || "",
         id: page.id,
       };
     });
