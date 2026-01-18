@@ -32,39 +32,17 @@
         min-height: 100vh;
         padding: 20px;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         align-items: flex-start;
-        overflow-x: auto;
-      }
-
-      .main-wrapper {
-        display: flex;
-        gap: 20px;
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
       }
 
       .container {
         background: white;
         border-radius: 20px;
         padding: 40px;
-        flex: 0 0 45%;
-        min-width: 350px;
+        width: 100%;
+        max-width: 500px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-height: 90vh;
-        overflow-y: auto;
-      }
-
-      .leaderboard-container {
-        background: white;
-        border-radius: 20px;
-        padding: 20px;
-        flex: 0 0 50%;
-        min-width: 350px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-height: 90vh;
-        overflow-y: auto;
       }
 
       h1 {
@@ -349,32 +327,19 @@
       }
 
       /* 모바일 반응형 */
-      @media (max-width: 1024px) {
-        body {
-          display: block;
-          align-items: auto;
-        }
-
-        .main-wrapper {
-          display: block;
-          max-width: 100%;
-        }
-
-        .container,
-        .leaderboard-container {
-          flex: none;
-          width: 100%;
-          max-height: none;
-          margin-bottom: 20px;
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="main-wrapper">
-      <div class="container">
-        <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
-        <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
+    <div class="container">
+      <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
+      <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
+
+      <a href="/leaderboard.html" class="leaderboard-button" style="display: block; text-align: center; text-decoration: none; margin-bottom: 20px;">🏆 리더보드 보기</a>
 
         <form id="runningForm">
           <div class="form-group">
@@ -469,62 +434,9 @@
             ✅ 복사되었습니다!
           </div>
         </div>
-      </div>
-
-      <div class="leaderboard-container" id="leaderboardContainer"></div>
     </div>
 
     <script>
-      // 리더보드 로드
-      function loadLeaderboardInline() {
-        fetch("/.netlify/functions/get-leaderboard")
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.leaderboard && data.leaderboard.length > 0) {
-              displayLeaderboardInline(data.leaderboard);
-            }
-          })
-          .catch((error) => console.error("리더보드 로드 실패:", error));
-      }
-
-      function displayLeaderboardInline(members) {
-        const container = document.getElementById("leaderboardContainer");
-
-        const html = `
-          <h2 style="color: #667eea; margin-bottom: 20px; text-align: center;">🏆 실시간 리더보드</h2>
-          <div style="max-height: 600px; overflow-y: auto;">
-            <div style="display: grid; grid-template-columns: 0.8fr 45px 55px 55px 70px 70px; gap: 6px; padding: 12px 15px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0; font-size: 12px;">
-              <div>이름</div>
-              <div style="text-align: center;">횟수</div>
-              <div style="text-align: center;">시간(분)</div>
-              <div style="text-align: center;">그룹</div>
-              <div style="text-align: center;">인스타</div>
-              <div style="text-align: center;">주활동</div>
-            </div>
-            ${members
-              .slice(0, 20)
-              .map(
-                (member) => `
-              <div style="display: grid; grid-template-columns: 0.8fr 45px 55px 55px 70px 70px; gap: 6px; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 12px;">
-                <div style="font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${member.name}</div>
-                <div style="text-align: center; color: #667eea; font-weight: 600; font-size: 12px;">${member.count}</div>
-                <div style="text-align: center; color: #667eea; font-weight: 600; font-size: 12px;">${Math.ceil(member.totalTime)}</div>
-                <div style="text-align: center; color: #666; background: #f5f5f5; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${member.group || "-"}</div>
-                <div style="text-align: center; color: #e1306c; font-size: 11px;">${member.instaId || "-"}</div>
-                <div style="text-align: center; color: #666; background: #f5f5f5; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${member.location || "-"}</div>
-              </div>
-            `,
-              )
-              .join("")}
-          </div>
-          <div style="text-align: center; margin-top: 15px;">
-            <a href="/leaderboard.html" style="color: #667eea; text-decoration: none; font-weight: 600;">전체 리더보드 보러가기 →</a>
-          </div>
-        `;
-
-        container.innerHTML = html;
-      }
-
       // 검색 기능 설정
       function setupSearch() {
         const searchInput = document.getElementById("nameSearch");
@@ -688,11 +600,6 @@
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("date").value = today;
         loadMembers();
-        loadLeaderboardInline();
-        setupSearch();
-
-        // 5초마다 리더보드 새로고침
-        setInterval(loadLeaderboardInline, 5000);
       });
 
       // 폼 제출
@@ -781,18 +688,6 @@ ${formData.name} | ${formData.date} | ${formData.duration}분
         });
       }
 
-      // 페이지 로드 시 실행
-      window.addEventListener("DOMContentLoaded", () => {
-        loadLeaderboardInline();
-        setupSearch();
-        loadMembers();
-        document
-          .getElementById("runningForm")
-          .addEventListener("submit", handleSubmit);
-      });
-
-      // 5초마다 리더보드 새로고침
-      setInterval(loadLeaderboardInline, 5000);
     </script>
   </body>
 </html>
