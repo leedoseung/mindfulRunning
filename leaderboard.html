@@ -469,7 +469,7 @@
           <div class="number-cell">${member.count}</div>
           <div class="number-cell">${ceiledTime}</div>
           <div class="group-cell">${member.group || "-"}</div>
-          <div class="insta-cell">${member.instaId ? "@" + member.instaId : "-"}</div>
+          <div class="insta-cell">${member.instaId || "-"}</div>
         `;
 
         return row;
