@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -25,23 +25,46 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         padding: 20px;
         display: flex;
-        justify-content: center;
-        align-items: center;
+        justify-content: flex-start;
+        align-items: flex-start;
+        overflow-x: auto;
+      }
+
+      .main-wrapper {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
       }
 
       .container {
         background: white;
         border-radius: 20px;
         padding: 40px;
-        max-width: 600px;
-        width: 100%;
+        flex: 0 0 45%;
+        min-width: 350px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .leaderboard-container {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        flex: 0 0 50%;
+        min-width: 350px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
       }
 
       h1 {
@@ -207,7 +230,9 @@
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
         margin-top: 10px;
       }
 
@@ -322,110 +347,184 @@
       .loading.show {
         display: block;
       }
+
+      /* 모바일 반응형 */
+      @media (max-width: 1024px) {
+        body {
+          display: block;
+          align-items: auto;
+        }
+
+        .main-wrapper {
+          display: block;
+          max-width: 100%;
+        }
+
+        .container,
+        .leaderboard-container {
+          flex: none;
+          width: 100%;
+          max-height: none;
+          margin-bottom: 20px;
+        }
+      }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
-      <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
+    <div class="main-wrapper">
+      <div class="container">
+        <h1>🏃‍♂️ 마인드풀러닝 기록</h1>
+        <p class="subtitle">오늘의 마음을 기록하고 공유해보세요</p>
 
-      <form id="runningForm">
-        <div class="form-group">
-          <label>이름 <span class="required">*</span></label>
-          <div class="select-wrapper">
+        <form id="runningForm">
+          <div class="form-group">
+            <label>이름 <span class="required">*</span></label>
+            <div class="select-wrapper">
+              <input
+                type="text"
+                id="nameSearch"
+                placeholder="이름 검색..."
+                autocomplete="off"
+              />
+              <select id="name" required size="5">
+                <option value="">선택해주세요</option>
+              </select>
+              <div class="member-count" id="memberCount"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>달린 날짜 <span class="required">*</span></label>
+            <input type="date" id="date" required />
+          </div>
+
+          <div class="form-group">
+            <label>달린 시간(분) <span class="required">*</span></label>
+            <input
+              type="number"
+              id="duration"
+              min="1"
+              placeholder="예: 30"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              >오늘의 한줄 제목/Story <span class="required">*</span></label
+            >
             <input
               type="text"
-              id="nameSearch"
-              placeholder="이름 검색..."
-              autocomplete="off"
+              id="title"
+              placeholder="오늘의 달리기를 한 문장으로"
+              required
             />
-            <select id="name" required size="5">
-              <option value="">선택해주세요</option>
-            </select>
-            <div class="member-count" id="memberCount"></div>
+          </div>
+
+          <div class="form-group">
+            <label>달리기 전 생각/느낌 <span class="required">*</span></label>
+            <textarea
+              id="before"
+              placeholder="문 밖을 나서기 전, 몸과 마음은 어떤 상태였나요?"
+              required
+            ></textarea>
+            <p class="description">
+              피로, 기대, 저항, 설렘... 무엇이든 괜찮습니다
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>달리기 중 생각/느낌 <span class="required">*</span></label>
+            <textarea
+              id="during"
+              placeholder="달리는 동안 무엇을 알아차렸나요?"
+              required
+            ></textarea>
+            <p class="description">
+              발이 땅에 닿는 감각, 호흡의 리듬, 스쳐간 생각들...
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>달리기 후 생각/느낌 <span class="required">*</span></label>
+            <textarea
+              id="after"
+              placeholder="멈추고 난 뒤의 나는 어땠나요?"
+              required
+            ></textarea>
+            <p class="description">달리기 전의 나와 무엇이 달라졌나요?</p>
+          </div>
+
+          <button type="submit">📝 기록하기</button>
+          <div class="loading">⏳ Notion에 저장 중...</div>
+          <div class="error-message"></div>
+        </form>
+
+        <div class="result-container" id="resultContainer">
+          <div class="result-text" id="resultText"></div>
+          <button class="copy-button" onclick="copyToClipboard()">
+            📋 복사하기
+          </button>
+          <div class="success-message" id="successMessage">
+            ✅ 복사되었습니다!
           </div>
         </div>
-
-        <div class="form-group">
-          <label>달린 날짜 <span class="required">*</span></label>
-          <input type="date" id="date" required />
-        </div>
-
-        <div class="form-group">
-          <label>달린 시간(분) <span class="required">*</span></label>
-          <input
-            type="number"
-            id="duration"
-            min="1"
-            placeholder="예: 30"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label>오늘의 한줄 제목/Story <span class="required">*</span></label>
-          <input
-            type="text"
-            id="title"
-            placeholder="오늘의 달리기를 한 문장으로"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label>달리기 전 생각/느낌 <span class="required">*</span></label>
-          <textarea
-            id="before"
-            placeholder="문 밖을 나서기 전, 몸과 마음은 어떤 상태였나요?"
-            required
-          ></textarea>
-          <p class="description">
-            피로, 기대, 저항, 설렘... 무엇이든 괜찮습니다
-          </p>
-        </div>
-
-        <div class="form-group">
-          <label>달리기 중 생각/느낌 <span class="required">*</span></label>
-          <textarea
-            id="during"
-            placeholder="달리는 동안 무엇을 알아차렸나요?"
-            required
-          ></textarea>
-          <p class="description">
-            발이 땅에 닿는 감각, 호흡의 리듬, 스쳐간 생각들...
-          </p>
-        </div>
-
-        <div class="form-group">
-          <label>달리기 후 생각/느낌 <span class="required">*</span></label>
-          <textarea
-            id="after"
-            placeholder="멈추고 난 뒤의 나는 어땠나요?"
-            required
-          ></textarea>
-          <p class="description">달리기 전의 나와 무엇이 달라졌나요?</p>
-        </div>
-
-        <button type="submit">📝 기록하기</button>
-        <div class="loading">⏳ Notion에 저장 중...</div>
-        <div class="error-message"></div>
-      </form>
-
-      <div class="result-container" id="resultContainer">
-        <div class="result-text" id="resultText"></div>
-        <button class="copy-button" onclick="copyToClipboard()">
-          📋 복사하기
-        </button>
-        <button class="leaderboard-button" onclick="goToLeaderboard()">
-          🏆 리더보드 보러가기
-        </button>
-        <div class="success-message" id="successMessage">
-          ✅ 복사되었습니다!
-        </div>
       </div>
+
+      <div class="leaderboard-container" id="leaderboardContainer"></div>
     </div>
 
     <script>
+      // 리더보드 로드
+      function loadLeaderboardInline() {
+        fetch("/.netlify/functions/get-leaderboard")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.leaderboard && data.leaderboard.length > 0) {
+              displayLeaderboardInline(data.leaderboard);
+            }
+          })
+          .catch((error) => console.error("리더보드 로드 실패:", error));
+      }
+
+      function displayLeaderboardInline(members) {
+        const container = document.getElementById("leaderboardContainer");
+
+        const html = `
+          <h2 style="color: #667eea; margin-bottom: 20px; text-align: center;">🏆 실시간 리더보드</h2>
+          <div style="max-height: 600px; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 1fr 60px 70px 80px 80px 90px; gap: 10px; padding: 15px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0;">
+              <div>이름</div>
+              <div style="text-align: center;">횟수</div>
+              <div style="text-align: center;">시간(분)</div>
+              <div style="text-align: center;">그룹</div>
+              <div style="text-align: center;">인스타</div>
+              <div style="text-align: center;">주활동</div>
+            </div>
+            ${members
+              .slice(0, 20)
+              .map(
+                (member) => `
+              <div style="display: grid; grid-template-columns: 1fr 60px 70px 80px 80px 90px; gap: 10px; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 13px;">
+                <div style="font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${member.name}</div>
+                <div style="text-align: center; color: #667eea; font-weight: 600;">${member.count}</div>
+                <div style="text-align: center; color: #667eea; font-weight: 600;">${Math.ceil(member.totalTime)}</div>
+                <div style="text-align: center; color: #666; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${member.group || "-"}</div>
+                <div style="text-align: center; color: #e1306c; font-size: 12px;">${member.instaId || "-"}</div>
+                <div style="text-align: center; color: #666; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${member.location || "-"}</div>
+              </div>
+            `,
+              )
+              .join("")}
+          </div>
+          <div style="text-align: center; margin-top: 15px;">
+            <a href="/leaderboard.html" style="color: #667eea; text-decoration: none; font-weight: 600;">전체 리더보드 보러가기 →</a>
+          </div>
+        `;
+
+        container.innerHTML = html;
+      }
+
       // 검색 기능 설정
       function setupSearch() {
         const searchInput = document.getElementById("nameSearch");
@@ -436,7 +535,7 @@
         // 모든 옵션 저장 (첫 번째 "선택해주세요" 제외)
         function saveOptions() {
           allOptions = Array.from(select.options).filter(
-            (opt) => opt.value !== ""
+            (opt) => opt.value !== "",
           );
         }
 
@@ -475,7 +574,7 @@
           } else {
             // 검색어로 필터링
             const filtered = allOptions.filter((opt) =>
-              opt.textContent.toLowerCase().includes(searchTerm)
+              opt.textContent.toLowerCase().includes(searchTerm),
             );
             updateOptions(filtered);
           }
@@ -563,9 +662,8 @@
             console.log("✅ 멤버 로드 성공:", data.members.length);
 
             // 멤버 수 표시
-            document.getElementById(
-              "memberCount"
-            ).textContent = `총 ${data.members.length}명`;
+            document.getElementById("memberCount").textContent =
+              `총 ${data.members.length}명`;
 
             // 검색 기능 활성화
             setupSearch();
@@ -590,6 +688,11 @@
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("date").value = today;
         loadMembers();
+        loadLeaderboardInline();
+        setupSearch();
+
+        // 5초마다 리더보드 새로고침
+        setInterval(loadLeaderboardInline, 5000);
       });
 
       // 폼 제출
@@ -678,10 +781,18 @@ ${formData.name} | ${formData.date} | ${formData.duration}분
         });
       }
 
-      // 리더보드 페이지로 이동
-      function goToLeaderboard() {
-        window.location.href = "/leaderboard.html";
-      }
+      // 페이지 로드 시 실행
+      window.addEventListener("DOMContentLoaded", () => {
+        loadLeaderboardInline();
+        setupSearch();
+        loadMembers();
+        document
+          .getElementById("runningForm")
+          .addEventListener("submit", handleSubmit);
+      });
+
+      // 5초마다 리더보드 새로고침
+      setInterval(loadLeaderboardInline, 5000);
     </script>
   </body>
 </html>
