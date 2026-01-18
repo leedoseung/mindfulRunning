@@ -18,9 +18,6 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // 정렬 기준 파라미터 (sortBy: 'count' or 'time', default: 'count')
-  const sortBy = event.queryStringParameters?.sortBy || "count";
-
   try {
     // db-mfrs-member에서 멤버 목록 조회
     const response = await fetch(
@@ -55,20 +52,13 @@ exports.handler = async (event, context) => {
         group: props["그룹"]?.select?.name || "",
         location: props["주활동"]?.select?.name || "",
         generation: props["기수"]?.select?.name || "",
-        instaId: props["인스타ID"]?.rich_text?.[0]?.text?.content || "",
+        instaId: props["@인스타ID"]?.rich_text?.[0]?.text?.content || "",
         id: page.id,
       };
     });
 
-    // 정렬 (횟수 또는 시간 기준)
-    const leaderboard = members
-      .filter((m) => m.count > 0) // 0회인 멤버 제외
-      .sort((a, b) => {
-        if (sortBy === "time") {
-          return b.totalTime - a.totalTime; // 총 시간 기준
-        }
-        return b.count - a.count; // 기본: 횟수 기준
-      });
+    // 0회인 멤버 제외만 하고 정렬하지 않음 (프론트엔드에서 정렬)
+    const leaderboard = members.filter((m) => m.count > 0);
 
     return {
       statusCode: 200,
@@ -76,7 +66,6 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         leaderboard,
         totalMembers: leaderboard.length,
-        sortBy,
         updatedAt: new Date().toISOString(),
       }),
     };

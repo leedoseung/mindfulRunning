@@ -26,14 +26,14 @@
       }
 
       .container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 20px;
       }
 
       .header {
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 40px;
         animation: fadeInDown 0.8s ease-out;
       }
 
@@ -88,7 +88,7 @@
 
       .table-header {
         display: grid;
-        grid-template-columns: 50px 1fr 80px 80px 100px 120px;
+        grid-template-columns: 1fr 80px 100px 120px 140px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 20px 25px;
@@ -107,8 +107,8 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 50px 1fr 80px 80px 100px 120px;
-        padding: 20px 25px;
+        grid-template-columns: 1fr 80px 100px 120px 140px;
+        padding: 18px 25px;
         border-bottom: 1px solid #f0f0f0;
         font-size: 15px;
         gap: 15px;
@@ -122,27 +122,6 @@
 
       .table-row:last-child {
         border-bottom: none;
-      }
-
-      /* 순위 열 */
-      .rank-cell {
-        font-size: 18px;
-        font-weight: 900;
-        color: #667eea;
-        text-align: center;
-      }
-
-      .rank-cell.rank-1 {
-        font-size: 22px;
-        color: #ffd700;
-      }
-
-      .rank-cell.rank-2 {
-        color: #c0c0c0;
-      }
-
-      .rank-cell.rank-3 {
-        color: #cd7f32;
       }
 
       /* 이름 열 */
@@ -166,6 +145,9 @@
         background-color: #f5f5f5;
         padding: 8px 12px;
         border-radius: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       /* 인스타 열 */
@@ -201,303 +183,6 @@
         }
       }
 
-      .leaderboard {
-        display: none;
-      }
-
-      .leaderboard.show {
-        display: block;
-      }
-
-      /* 반응형 - 모바일 */
-      @media (max-width: 1024px) {
-        .table-header,
-        .table-row {
-          grid-template-columns: 40px 1fr 70px 70px 90px 100px;
-          padding: 15px 20px;
-          font-size: 13px;
-        }
-
-        .sort-button {
-          padding: 8px 16px;
-          font-size: 12px;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .table-header,
-        .table-row {
-          grid-template-columns: 35px 1fr 60px 60px 80px 85px;
-          padding: 12px 15px;
-          font-size: 12px;
-          gap: 10px;
-        }
-
-        .rank-cell {
-          font-size: 16px;
-        }
-
-        .rank-cell.rank-1 {
-          font-size: 20px;
-        }
-
-        .name-cell {
-          min-width: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .group-cell {
-          padding: 6px 8px;
-          font-size: 12px;
-        }
-
-        .insta-cell {
-          font-size: 12px;
-        }
-      }
-
-      /* 순위 카드 공통 스타일 */
-      .rank-card {
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        position: relative;
-        overflow: hidden;
-        opacity: 0;
-        transform: translateY(30px);
-        transition: transform 0.3s ease;
-      }
-
-      .rank-card:hover {
-        transform: translateY(-5px) scale(1.02);
-      }
-
-      /* 1위 특별 스타일 */
-      .rank-card.rank-1 {
-        background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-        animation:
-          slideInBounce 0.8s ease-out 0.2s forwards,
-          pulse 2s ease-in-out 1s infinite;
-        min-height: 140px;
-        margin-bottom: 30px;
-      }
-
-      .rank-card.rank-1 .rank-number {
-        font-size: 80px;
-        color: rgba(255, 255, 255, 0.9);
-      }
-
-      .rank-card.rank-1 .name {
-        font-size: 32px;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .rank-card.rank-1 .count {
-        font-size: 28px;
-        color: white;
-      }
-
-      .rank-card.rank-1::before {
-        content: "👑";
-        position: absolute;
-        top: -20px;
-        right: 20px;
-        font-size: 60px;
-        animation: bounce 1s ease-in-out 1.2s infinite;
-      }
-
-      /* 2위 스타일 */
-      .rank-card.rank-2 {
-        background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
-        animation: slideInBounce 0.8s ease-out 0.4s forwards;
-      }
-
-      .rank-card.rank-2 .rank-number {
-        font-size: 60px;
-        color: rgba(255, 255, 255, 0.9);
-      }
-
-      .rank-card.rank-2 .name {
-        font-size: 26px;
-        color: white;
-        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      /* 3위 스타일 */
-      .rank-card.rank-3 {
-        background: linear-gradient(135deg, #cd7f32 0%, #b8732d 100%);
-        animation: slideInBounce 0.8s ease-out 0.6s forwards;
-      }
-
-      .rank-card.rank-3 .rank-number {
-        font-size: 60px;
-        color: #ffffff;
-        font-weight: 900;
-        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-      }
-
-      .rank-card.rank-3 .name {
-        font-size: 26px;
-        color: white;
-        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      /* 4-5위 스타일 */
-      .rank-card.rank-4 {
-        animation: slideInBounce 0.8s ease-out 0.8s forwards;
-      }
-
-      .rank-card.rank-5 {
-        animation: slideInBounce 0.8s ease-out 1s forwards;
-      }
-
-      /* 순위 숫자 */
-      .rank-number {
-        font-size: 48px;
-        font-weight: 900;
-        color: #667eea;
-        min-width: 80px;
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      /* 멤버 정보 */
-      .member-info {
-        flex: 1;
-      }
-
-      .name {
-        font-size: 24px;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 8px;
-      }
-
-      .details {
-        color: #666;
-        font-size: 14px;
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-      }
-
-      .detail-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-      }
-
-      /* 달리기 횟수 */
-      .count {
-        font-size: 36px;
-        font-weight: 900;
-        color: #667eea;
-        text-align: right;
-        margin-right: 60px;
-      }
-
-      .count-label {
-        font-size: 12px;
-        color: #999;
-        text-align: right;
-        margin-top: -5px;
-        margin-right: 60px;
-      }
-
-      /* 메달 효과 */
-      .medal {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 40px;
-        animation: swing 2s ease-in-out infinite;
-      }
-
-      /* 애니메이션 */
-      @keyframes fadeInDown {
-        from {
-          opacity: 0;
-          transform: translateY(-30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideInBounce {
-        0% {
-          opacity: 0;
-          transform: translateX(-50px) scale(0.9);
-        }
-        60% {
-          opacity: 1;
-          transform: translateX(10px) scale(1.05);
-        }
-        100% {
-          opacity: 1;
-          transform: translateX(0) scale(1);
-        }
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
-        }
-        50% {
-          box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
-        }
-      }
-
-      @keyframes bounce {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-      }
-
-      @keyframes swing {
-        0%,
-        100% {
-          transform: rotate(-5deg);
-        }
-        50% {
-          transform: rotate(5deg);
-        }
-      }
-
-      /* 반짝이는 효과 */
-      @keyframes sparkle {
-        0%,
-        100% {
-          opacity: 0.3;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
-
-      .rank-card.rank-1::after {
-        content: "✨";
-        position: absolute;
-        bottom: 15px;
-        right: 80px;
-        font-size: 30px;
-        animation: sparkle 1.5s ease-in-out infinite;
-      }
-
       /* 에러 메시지 */
       .error-message {
         background: white;
@@ -527,59 +212,66 @@
         transform: translateY(-2px);
       }
 
-      /* 모바일 반응형 */
+      /* 애니메이션 */
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 반응형 - 모바일 */
+      @media (max-width: 1024px) {
+        .table-header,
+        .table-row {
+          grid-template-columns: 1fr 70px 90px 110px 130px;
+          padding: 15px 20px;
+          font-size: 13px;
+          gap: 12px;
+        }
+
+        .sort-button {
+          padding: 8px 16px;
+          font-size: 12px;
+        }
+      }
+
       @media (max-width: 768px) {
         .header h1 {
           font-size: 32px;
         }
 
-        .rank-card {
-          padding: 20px 15px;
-          gap: 15px;
+        .table-header,
+        .table-row {
+          grid-template-columns: 1fr 60px 80px 100px 110px;
+          padding: 12px 15px;
+          font-size: 12px;
+          gap: 10px;
         }
 
-        .rank-card.rank-1 {
-          min-height: 120px;
+        .name-cell {
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
-        .rank-number {
-          font-size: 36px;
-          min-width: 60px;
+        .group-cell {
+          padding: 6px 8px;
+          font-size: 12px;
         }
 
-        .rank-card.rank-1 .rank-number {
-          font-size: 60px;
+        .insta-cell {
+          font-size: 12px;
         }
 
-        .rank-card.rank-1 .name {
-          font-size: 24px;
-        }
-
-        .rank-card.rank-1 .count {
-          font-size: 24px;
-        }
-
-        .name {
-          font-size: 20px;
-        }
-
-        .count {
-          font-size: 28px;
-          margin-right: 50px;
-        }
-
-        .count-label {
-          margin-right: 50px;
-        }
-
-        .rank-card.rank-1::before {
-          font-size: 40px;
-          top: -10px;
-          right: 10px;
-        }
-
-        .medal {
-          font-size: 30px;
+        .sort-button {
+          padding: 8px 12px;
+          font-size: 11px;
         }
       }
 
@@ -627,7 +319,6 @@
       <!-- Grid 테이블 -->
       <div class="table-container" id="tableContainer" style="display: none">
         <div class="table-header">
-          <div>순위</div>
           <div>이름</div>
           <div>횟수</div>
           <div>시간(분)</div>
@@ -647,11 +338,9 @@
       let currentSort = "count";
 
       // 리더보드 데이터 로드
-      async function loadLeaderboard(sortBy = "count") {
+      async function loadLeaderboard() {
         try {
-          const response = await fetch(
-            `/.netlify/functions/get-leaderboard?sortBy=${sortBy}`,
-          );
+          const response = await fetch("/.netlify/functions/get-leaderboard");
 
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -661,8 +350,7 @@
 
           if (data.leaderboard && data.leaderboard.length > 0) {
             currentData = data;
-            currentSort = sortBy;
-            displayLeaderboard(data.leaderboard);
+            sortLeaderboard("count"); // 기본 정렬: 횟수
           } else {
             showError("아직 기록이 없습니다.");
           }
@@ -670,6 +358,30 @@
           console.error("리더보드 로드 실패:", error);
           showError("리더보드를 불러오는데 실패했습니다.");
         }
+      }
+
+      // JavaScript에서 정렬
+      function sortLeaderboard(sortBy) {
+        if (!currentData) return;
+
+        let sorted = [...currentData.leaderboard];
+
+        if (sortBy === "time") {
+          sorted.sort((a, b) => b.totalTime - a.totalTime);
+        } else {
+          sorted.sort((a, b) => b.count - a.count);
+        }
+
+        displayLeaderboard(sorted);
+        currentSort = sortBy;
+
+        // 버튼 활성화 상태 업데이트
+        document
+          .getElementById("sortByCount")
+          .classList.toggle("active", sortBy === "count");
+        document
+          .getElementById("sortByTime")
+          .classList.toggle("active", sortBy === "time");
       }
 
       // 리더보드 테이블 표시
@@ -681,9 +393,8 @@
         tableRows.innerHTML = "";
 
         // 모든 멤버 표시
-        members.forEach((member, index) => {
-          const rank = index + 1;
-          const row = createTableRow(member, rank);
+        members.forEach((member) => {
+          const row = createTableRow(member);
           tableRows.appendChild(row);
         });
 
@@ -693,21 +404,17 @@
       }
 
       // 테이블 행 생성
-      function createTableRow(member, rank) {
+      function createTableRow(member) {
         const row = document.createElement("div");
         row.className = "table-row";
 
-        // 순위 아이콘
-        let rankIcon = rank.toString();
-        if (rank === 1) rankIcon = "🥇";
-        else if (rank === 2) rankIcon = "🥈";
-        else if (rank === 3) rankIcon = "🥉";
+        // 달린시간 올림 (소수점 올림하여 정수)
+        const ceiledTime = Math.ceil(member.totalTime);
 
         row.innerHTML = `
-          <div class="rank-cell rank-${rank}">${rankIcon}</div>
           <div class="name-cell">${member.name}</div>
           <div class="number-cell">${member.count}</div>
-          <div class="number-cell">${member.totalTime}</div>
+          <div class="number-cell">${ceiledTime}</div>
           <div class="group-cell">${member.group || "-"}</div>
           <div class="insta-cell">${member.instaId ? "@" + member.instaId : "-"}</div>
         `;
@@ -736,23 +443,17 @@
       document
         .getElementById("sortByCount")
         .addEventListener("click", function () {
-          this.classList.add("active");
-          document.getElementById("sortByTime").classList.remove("active");
-          loadLeaderboard("count");
+          sortLeaderboard("count");
         });
 
       document
         .getElementById("sortByTime")
         .addEventListener("click", function () {
-          this.classList.add("active");
-          document.getElementById("sortByCount").classList.remove("active");
-          loadLeaderboard("time");
+          sortLeaderboard("time");
         });
 
       // 페이지 로드 시 실행
-      window.addEventListener("DOMContentLoaded", () =>
-        loadLeaderboard("count"),
-      );
+      window.addEventListener("DOMContentLoaded", loadLeaderboard);
     </script>
   </body>
 </html>
