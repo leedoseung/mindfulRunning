@@ -1,0 +1,24 @@
+{
+  "name": "마인드풀러닝 리더보드",
+  "short_name": "마인드풀러닝",
+  "description": "마인드풀러닝 커뮤니티 리더보드 - 달린 횟수와 시간으로 경쟁하세요",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "maskable"
+    }
+  ]
+}
