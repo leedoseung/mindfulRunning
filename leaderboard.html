@@ -51,31 +51,30 @@
 
       /* 정렬 버튼 */
       .sort-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 30px;
+        display: none;
       }
 
-      .sort-button {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 2px solid white;
-        padding: 10px 20px;
-        border-radius: 25px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .sort-button:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
-
-      .sort-button.active {
+      /* 검색 박스 */
+      .search-box {
         background: white;
-        color: #667eea;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #667eea;
       }
 
       /* Grid 테이블 */
@@ -96,6 +95,31 @@
         font-size: 14px;
         gap: 15px;
         align-items: center;
+        user-select: none;
+      }
+
+      /* 정렬 가능한 헤더 셀 */
+      .sortable {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: opacity 0.2s ease;
+      }
+
+      .sortable:hover {
+        opacity: 0.8;
+      }
+
+      .sort-arrow {
+        font-size: 12px;
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+      }
+
+      .sortable.active .sort-arrow {
+        opacity: 1;
       }
 
       .table-rows {
@@ -303,12 +327,14 @@
         <p>함께 달려요!</p>
       </div>
 
-      <!-- 정렬 버튼 -->
-      <div class="sort-buttons">
-        <button class="sort-button active" id="sortByCount">
-          📊 달린횟수 순
-        </button>
-        <button class="sort-button" id="sortByTime">⏱️ 달린시간 순</button>
+      <!-- 검색 박스 -->
+      <div class="search-box">
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="🔍 회원 이름으로 검색하세요..."
+        />
       </div>
 
       <div class="loading" id="loading">
@@ -320,8 +346,14 @@
       <div class="table-container" id="tableContainer" style="display: none">
         <div class="table-header">
           <div>이름</div>
-          <div>횟수</div>
-          <div>시간(분)</div>
+          <div class="sortable active" data-sort="count">
+            횟수
+            <span class="sort-arrow" id="countArrow">↓</span>
+          </div>
+          <div class="sortable" data-sort="time">
+            시간(분)
+            <span class="sort-arrow">↑↓</span>
+          </div>
           <div>그룹</div>
           <div>인스타ID</div>
         </div>
@@ -335,7 +367,8 @@
 
     <script>
       let currentData = null;
-      let currentSort = "count";
+      let currentSort = { field: "count", ascending: false };
+      let filteredData = [];
 
       // 리더보드 데이터 로드
       async function loadLeaderboard() {
@@ -350,7 +383,8 @@
 
           if (data.leaderboard && data.leaderboard.length > 0) {
             currentData = data;
-            sortLeaderboard("count"); // 기본 정렬: 횟수
+            filteredData = [...data.leaderboard];
+            sortAndDisplay("count", false); // 기본 정렬: 횟수 내림차순
           } else {
             showError("아직 기록이 없습니다.");
           }
@@ -360,28 +394,42 @@
         }
       }
 
-      // JavaScript에서 정렬
-      function sortLeaderboard(sortBy) {
+      // 정렬 및 표시
+      function sortAndDisplay(field, ascending) {
         if (!currentData) return;
 
-        let sorted = [...currentData.leaderboard];
+        let sorted = [...filteredData];
 
-        if (sortBy === "time") {
-          sorted.sort((a, b) => b.totalTime - a.totalTime);
-        } else {
-          sorted.sort((a, b) => b.count - a.count);
+        if (field === "count") {
+          sorted.sort((a, b) =>
+            ascending ? a.count - b.count : b.count - a.count,
+          );
+        } else if (field === "time") {
+          sorted.sort((a, b) =>
+            ascending ? a.totalTime - b.totalTime : b.totalTime - a.totalTime,
+          );
         }
 
+        currentSort = { field, ascending };
+        updateSortArrows();
         displayLeaderboard(sorted);
-        currentSort = sortBy;
+      }
 
-        // 버튼 활성화 상태 업데이트
-        document
-          .getElementById("sortByCount")
-          .classList.toggle("active", sortBy === "count");
-        document
-          .getElementById("sortByTime")
-          .classList.toggle("active", sortBy === "time");
+      // 정렬 화살표 업데이트
+      function updateSortArrows() {
+        const sortables = document.querySelectorAll(".sortable");
+        sortables.forEach((el) => {
+          const field = el.getAttribute("data-sort");
+          const arrow = el.querySelector(".sort-arrow");
+
+          if (field === currentSort.field) {
+            el.classList.add("active");
+            arrow.textContent = currentSort.ascending ? "↑" : "↓";
+          } else {
+            el.classList.remove("active");
+            arrow.textContent = field === "count" ? "↓" : "↑↓";
+          }
+        });
       }
 
       // 리더보드 테이블 표시
@@ -392,11 +440,16 @@
 
         tableRows.innerHTML = "";
 
-        // 모든 멤버 표시
-        members.forEach((member) => {
-          const row = createTableRow(member);
-          tableRows.appendChild(row);
-        });
+        if (members.length === 0) {
+          tableRows.innerHTML =
+            '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">검색 결과가 없습니다.</div>';
+        } else {
+          // 모든 멤버 표시
+          members.forEach((member) => {
+            const row = createTableRow(member);
+            tableRows.appendChild(row);
+          });
+        }
 
         // 로딩 숨기고 테이블 표시
         loadingEl.style.display = "none";
@@ -422,6 +475,22 @@
         return row;
       }
 
+      // 검색 필터링
+      function filterBySearch(keyword) {
+        if (!currentData) return;
+
+        if (!keyword.trim()) {
+          filteredData = [...currentData.leaderboard];
+        } else {
+          const searchLower = keyword.toLowerCase();
+          filteredData = currentData.leaderboard.filter((member) =>
+            member.name.toLowerCase().includes(searchLower),
+          );
+        }
+
+        sortAndDisplay(currentSort.field, currentSort.ascending);
+      }
+
       // 에러 표시
       function showError(message) {
         const loadingEl = document.getElementById("loading");
@@ -439,17 +508,21 @@
         `;
       }
 
-      // 정렬 버튼 이벤트
-      document
-        .getElementById("sortByCount")
-        .addEventListener("click", function () {
-          sortLeaderboard("count");
+      // 헤더 정렬 버튼 이벤트
+      document.querySelectorAll(".sortable").forEach((el) => {
+        el.addEventListener("click", function () {
+          const field = this.getAttribute("data-sort");
+          const isCurrentField = field === currentSort.field;
+          const ascending = isCurrentField ? !currentSort.ascending : false;
+          sortAndDisplay(field, ascending);
         });
+      });
 
+      // 검색 입력 이벤트
       document
-        .getElementById("sortByTime")
-        .addEventListener("click", function () {
-          sortLeaderboard("time");
+        .getElementById("searchInput")
+        .addEventListener("input", function () {
+          filterBySearch(this.value);
         });
 
       // 페이지 로드 시 실행
