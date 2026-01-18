@@ -87,7 +87,7 @@
 
       .table-header {
         display: grid;
-        grid-template-columns: 1fr 80px 100px 120px 140px;
+        grid-template-columns: 1fr 80px 100px 120px 120px 140px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 20px 25px;
@@ -131,7 +131,7 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 1fr 80px 100px 120px 140px;
+        grid-template-columns: 1fr 80px 100px 120px 120px 140px;
         padding: 18px 25px;
         border-bottom: 1px solid #f0f0f0;
         font-size: 15px;
@@ -163,6 +163,19 @@
 
       /* 그룹 열 */
       .group-cell {
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        background-color: #f5f5f5;
+        padding: 8px 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* 주활동 열 */
+      .location-cell {
         text-align: center;
         color: #666;
         font-size: 14px;
@@ -336,7 +349,9 @@
           />
           마인드풀러닝 리더보드
         </h1>
-        <p>함께 달려요!</p>
+        <p>
+          내가 할 수 있는 달리기를 하다보면, 내가 할 수 없던 달리기를 하게된다.
+        </p>
       </div>
 
       <!-- 검색 박스 -->
@@ -367,6 +382,7 @@
             <span class="sort-arrow">↑↓</span>
           </div>
           <div>그룹</div>
+          <div>주활동</div>
           <div>인스타ID</div>
         </div>
         <div class="table-rows" id="tableRows"></div>
@@ -481,6 +497,7 @@
           <div class="number-cell">${member.count}</div>
           <div class="number-cell">${ceiledTime}</div>
           <div class="group-cell">${member.group || "-"}</div>
+          <div class="location-cell">${member.location || "-"}</div>
           <div class="insta-cell">${member.instaId || "-"}</div>
         `;
 
