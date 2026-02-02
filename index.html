@@ -128,7 +128,19 @@
         }
 
         #name.collapsed {
-          display: none;
+          visibility: hidden;
+          height: 0;
+          overflow: hidden;
+          opacity: 0;
+          margin-top: 0;
+          padding: 0;
+          border: none;
+        }
+
+        #name:not(.collapsed) {
+          visibility: visible;
+          height: auto;
+          opacity: 1;
         }
 
         #nameSearch.selected {
@@ -508,6 +520,18 @@
         searchInput.addEventListener("input", (e) => {
           const searchTerm = e.target.value.toLowerCase().trim();
 
+          // 셀렉트박스 보이기 (모바일에서도)
+          select.classList.remove("collapsed");
+          select.size = 5;
+
+          // iOS Safari를 위한 명시적 스타일 설정
+          if (window.innerWidth <= 768) {
+            select.style.display = "block";
+            select.style.visibility = "visible";
+            select.style.height = "auto";
+            select.style.opacity = "1";
+          }
+
           if (searchTerm === "") {
             // 검색어 없으면 전체 표시
             updateOptions(allOptions);
@@ -531,6 +555,10 @@
             // 모바일에서는 셀렉트박스 숨김
             if (window.innerWidth <= 768) {
               select.classList.add("collapsed");
+              // iOS Safari를 위한 명시적 숨김
+              select.style.visibility = "hidden";
+              select.style.height = "0";
+              select.style.opacity = "0";
             } else {
               select.size = 1; // 데스크탑에서는 크기만 축소
             }
@@ -541,6 +569,15 @@
         searchInput.addEventListener("focus", () => {
           select.classList.remove("collapsed");
           select.size = 5; // 목록 확장
+
+          // iOS Safari를 위한 명시적 스타일 설정
+          if (window.innerWidth <= 768) {
+            select.style.display = "block";
+            select.style.visibility = "visible";
+            select.style.height = "auto";
+            select.style.opacity = "1";
+          }
+
           if (searchInput.value && select.value) {
             // 이미 선택된 값이 있으면 검색창 비우기
             searchInput.value = "";
@@ -562,6 +599,10 @@
         // 초기 상태: 모바일에서는 셀렉트박스 숨김
         if (window.innerWidth <= 768) {
           select.classList.add("collapsed");
+          // iOS Safari를 위한 명시적 숨김
+          select.style.visibility = "hidden";
+          select.style.height = "0";
+          select.style.opacity = "0";
         }
 
         // 화면 밖 클릭 시 셀렉트박스 닫기
@@ -570,6 +611,10 @@
           if (wrapper && !wrapper.contains(e.target)) {
             if (window.innerWidth <= 768) {
               select.classList.add("collapsed");
+              // iOS Safari를 위한 명시적 숨김
+              select.style.visibility = "hidden";
+              select.style.height = "0";
+              select.style.opacity = "0";
             }
           }
         });
