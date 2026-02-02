@@ -3,6 +3,7 @@
   "short_name": "마인드풀러닝",
   "description": "마인드풀러닝 커뮤니티 리더보드 - 달린 횟수와 시간으로 경쟁하세요",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
