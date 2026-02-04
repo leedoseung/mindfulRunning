@@ -401,6 +401,15 @@
           </div>
 
           <div class="form-group">
+            <label>달린장소</label>
+            <input
+              type="text"
+              id="location"
+              placeholder="예: 한강공원, 동네 공원"
+            />
+          </div>
+
+          <div class="form-group">
             <label
               >오늘의 한줄 제목/Story <span class="required">*</span></label
             >
@@ -700,6 +709,7 @@
             name: selectedOption.dataset.name || selectedOption.textContent, // 멤버 이름 (표시용)
             date: document.getElementById("date").value,
             duration: document.getElementById("duration").value,
+            location: document.getElementById("location").value,
             title: document.getElementById("title").value,
             before: document.getElementById("before").value,
             during: document.getElementById("during").value,
@@ -716,7 +726,7 @@
           // 결과 텍스트 생성
           const resultText = `📝 오늘의 마인드풀러닝 기록
 
-${formData.name} | ${formData.date} | ${formData.duration}분
+${formData.name} | ${formData.date} | ${formData.duration}분${formData.location ? ` | ${formData.location}` : ''}
 
 🏃 오늘의 한줄: ${formData.title}
 

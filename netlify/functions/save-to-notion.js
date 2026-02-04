@@ -108,7 +108,12 @@ exports.handler = async (event, context) => {
           },
           '달리기 후 생각/느낌': {
             rich_text: [{ text: { content: formData.after } }]
-          }
+          },
+          ...(formData.location ? {
+            '달린 장소': {
+              rich_text: [{ text: { content: formData.location } }]
+            }
+          } : {})
         }
       })
     });
