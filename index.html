@@ -447,7 +447,7 @@
           </div>
 
           <button type="submit">📝 기록하기</button>
-          <a href="/leaderboard.html" class="leaderboard-button" onclick="return confirm('현재의 달리기 기록을 기록 및 복사하셨습니까?')">🏆 리더보드 보기</a>
+          <a href="javascript:void(0)" class="leaderboard-button" id="leaderboardBtn">🏆 리더보드 보기</a>
           <div class="loading">⏳ Notion에 저장 중...</div>
           <div class="error-message"></div>
         </form>
@@ -800,6 +800,14 @@ ${formData.name} | ${formData.date} | ${formData.duration}분
           setTimeout(() => msg.classList.remove("show"), 2000);
         });
       }
+
+      // 리더보드 버튼 클릭
+      document.getElementById("leaderboardBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        if (confirm("현재의 달리기 기록을 기록 및 복사하셨습니까?")) {
+          window.location.href = "/leaderboard.html";
+        }
+      });
 
     </script>
   </body>

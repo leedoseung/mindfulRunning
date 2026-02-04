@@ -45,3 +45,36 @@ netlify dev
 - Property names include Korean characters and special formatting (e.g., `이름\`` with backtick)
 - Running log properties: `오늘의 한줄 제목/Story`, `달린 날짜`, `달린 시간(분)`, `달리기 전/중/후 생각/느낌`
 - Member properties: `Name`, `그룹`, `주활동`, `기수`, `@인스타ID`
+
+## Change Log (2026-02-02)
+
+### PWA 아이콘 개선
+- `favicon.ico`(32x32)를 PNG로 변환하여 `icon-192.png`, `icon-512.png` 생성
+- `manifest.json`에 PNG 아이콘 참조 및 `scope` 추가
+- `index.html`, `leaderboard.html`의 `apple-touch-icon`을 PNG로 변경
+- 안드로이드 홈화면 아이콘 미표시 문제 해결
+
+### Service Worker 추가
+- `sw.js` 생성 (네트워크 우선, 실패 시 캐시 전략)
+- `index.html`, `leaderboard.html`에 Service Worker 등록 코드 추가
+- 안드로이드 PWA 설치 후 홈화면에 추가되지 않는 문제 해결
+
+### iOS Safari 셀렉트박스 호환성
+- 모바일에서 이름 검색 시 셀렉트박스가 자동으로 표시되도록 수정
+- `display: none` 대신 `visibility/height/opacity` 조합으로 iOS Safari 호환
+- 입력, 포커스, 선택, 화면 밖 클릭 시 명시적 인라인 스타일 설정
+
+### 중복 제출 방지
+- 프론트엔드: `localStorage`에 `사용자ID + 날짜` 저장하여 1차 차단
+- 백엔드: `save-to-notion.js`에서 Notion DB 조회로 2차 검증 (같은 사용자 + 같은 날짜)
+- 중복 시 confirm 팝업으로 사용자 선택 가능 (`force: true`로 강제 저장)
+
+### 리더보드 보기 버튼 확인
+- 리더보드 이동 전 `confirm('현재의 달리기 기록을 기록 및 복사하셨습니까?')` 추가
+
+### 리더보드 디자인 개선
+- 좌우 여백 제거, 전체 폭 활용 레이아웃
+- 테이블 헤더를 밝은 회색 배경으로 변경, sticky 헤더 적용
+- 글자 크기 증가 (모바일 13~14px, 데스크탑 16px)
+- 그룹/주활동 셀 배경색 제거, 행 높이 증가
+- `max-height` 제거하여 전체 데이터 표시
