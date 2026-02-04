@@ -447,7 +447,7 @@
           </div>
 
           <button type="submit">📝 기록하기</button>
-          <a href="/leaderboard.html" class="leaderboard-button">🏆 리더보드 보기</a>
+          <a href="/leaderboard.html" class="leaderboard-button" onclick="return confirm('현재의 달리기 기록을 기록 및 복사하셨습니까?')">🏆 리더보드 보기</a>
           <div class="loading">⏳ Notion에 저장 중...</div>
           <div class="error-message"></div>
         </form>
@@ -675,6 +675,17 @@
         loadMembers();
       });
 
+      // 중복 제출 체크 (localStorage)
+      function isDuplicateSubmission(memberId, date) {
+        const key = `run_${memberId}_${date}`;
+        return localStorage.getItem(key) !== null;
+      }
+
+      function saveDuplicateCheck(memberId, date) {
+        const key = `run_${memberId}_${date}`;
+        localStorage.setItem(key, new Date().toISOString());
+      }
+
       // 폼 제출
       document
         .getElementById("runningForm")
@@ -694,6 +705,13 @@
             during: document.getElementById("during").value,
             after: document.getElementById("after").value,
           };
+
+          // 1차: localStorage 중복 체크
+          if (isDuplicateSubmission(formData.memberId, formData.date)) {
+            if (!confirm(`${formData.name}님의 ${formData.date} 기록이 이미 존재합니다.\n그래도 다시 제출하시겠습니까?`)) {
+              return;
+            }
+          }
 
           // 결과 텍스트 생성
           const resultText = `📝 오늘의 마인드풀러닝 기록
@@ -736,8 +754,30 @@ ${formData.name} | ${formData.date} | ${formData.duration}분
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error || "Notion 저장 실패");
+            // 중복 기록인 경우
+            if (response.status === 409 && data.duplicate) {
+              if (!confirm(`${data.error}\n그래도 다시 제출하시겠습니까?`)) {
+                loadingEl.classList.remove("show");
+                submitBtn.disabled = false;
+                return;
+              }
+              // 사용자가 확인을 눌렀으면 강제 저장
+              const retryResponse = await fetch("/.netlify/functions/save-to-notion", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...formData, force: true }),
+              });
+              const retryData = await retryResponse.json();
+              if (!retryResponse.ok) {
+                throw new Error(retryData.error || "Notion 저장 실패");
+              }
+            } else {
+              throw new Error(data.error || "Notion 저장 실패");
+            }
           }
+
+          // 저장 성공 시 localStorage에 기록
+          saveDuplicateCheck(formData.memberId, formData.date);
 
           loadingEl.classList.remove("show");
           console.log("✅ Notion에 저장 완료!");

@@ -26,11 +26,54 @@ exports.handler = async (event, context) => {
 
   try {
     const formData = JSON.parse(event.body);
-    
+
     // 디버깅: 환경 변수 확인
     console.log('DATA_SOURCE_ID:', process.env.DATA_SOURCE_ID);
     console.log('NOTION_API_KEY exists:', !!process.env.NOTION_API_KEY);
-    
+
+    // 중복 체크: 강제 저장이 아닌 경우에만 실행
+    if (!formData.force) {
+      const duplicateCheck = await fetch(`https://api.notion.com/v1/databases/${process.env.DATA_SOURCE_ID}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NOTION_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          filter: {
+            and: [
+              {
+                property: '이름`',
+                relation: {
+                  contains: formData.memberId
+                }
+              },
+              {
+                property: '달린 날짜',
+                date: {
+                  equals: formData.date
+                }
+              }
+            ]
+          }
+        })
+      });
+
+      const duplicateData = await duplicateCheck.json();
+
+      if (duplicateCheck.ok && duplicateData.results && duplicateData.results.length > 0) {
+        return {
+          statusCode: 409,
+          headers,
+          body: JSON.stringify({
+            error: '이미 해당 날짜에 기록이 존재합니다.',
+            duplicate: true
+          })
+        };
+      }
+    }
+
     // Notion API 호출
     const response = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
