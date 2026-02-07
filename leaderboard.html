@@ -382,6 +382,160 @@
       .home-button:hover {
         transform: scale(1.1);
       }
+
+      /* 오늘의 러닝 기록 버튼 - 숨김 */
+      .today-record-button {
+        display: none;
+      }
+
+      /* 레이어 팝업 */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+      }
+
+      @keyframes slideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(100px) scale(0.8) rotate(-2deg);
+        }
+        60% {
+          opacity: 1;
+          transform: translateY(-10px) scale(1.02) rotate(1deg);
+        }
+        80% {
+          transform: translateY(5px) scale(0.98) rotate(-0.5deg);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(0deg);
+        }
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: #999;
+        cursor: pointer;
+        padding: 5px 10px;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+
+      .modal-close:hover {
+        color: #333;
+      }
+
+      .modal-header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .modal-header h2 {
+        color: #667eea;
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .modal-header .subtitle {
+        color: #999;
+        font-size: 14px;
+      }
+
+      .record-field {
+        margin-bottom: 20px;
+      }
+
+      .record-field label {
+        display: block;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .record-field .value {
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .record-field .value.empty {
+        color: #999;
+        font-style: italic;
+      }
+
+      .no-records-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+        font-size: 16px;
+      }
+
+      /* 모바일 반응형 */
+      @media (max-width: 480px) {
+        .today-record-button {
+          bottom: 90px;
+          right: 20px;
+          padding: 12px 20px;
+          font-size: 13px;
+        }
+
+        .modal-content {
+          padding: 20px;
+          max-height: 85vh;
+        }
+
+        .modal-header h2 {
+          font-size: 20px;
+        }
+
+        .record-field label {
+          font-size: 13px;
+        }
+
+        .record-field .value {
+          font-size: 14px;
+          padding: 10px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -442,7 +596,27 @@
       <div id="errorContainer"></div>
     </div>
 
+    <button class="today-record-button" id="todayRecordButton">
+      📖 오늘의 러닝 기록
+    </button>
+
     <a href="/" class="home-button">🏃 기록하러 가기</a>
+
+    <!-- 레이어 팝업 -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-content">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <div class="modal-header">
+          <h2>🏃 아름다운 달리기 추억들..</h2>
+          <p class="subtitle" id="modalSubtitle">로딩 중...</p>
+        </div>
+        <div id="modalBody">
+          <div class="loading" style="padding: 40px 20px;">
+            <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       // Service Worker 등록
@@ -477,12 +651,15 @@
             currentData = data;
             filteredData = [...data.leaderboard];
             sortAndDisplay("count", false); // 기본 정렬: 횟수 내림차순
+            return data; // 데이터 반환
           } else {
             showError("아직 기록이 없습니다.");
+            return null;
           }
         } catch (error) {
           console.error("리더보드 로드 실패:", error);
           showError("리더보드를 불러오는데 실패했습니다.");
+          return null;
         }
       }
 
@@ -619,7 +796,151 @@
         });
 
       // 페이지 로드 시 실행
-      window.addEventListener("DOMContentLoaded", loadLeaderboard);
+      window.addEventListener("DOMContentLoaded", async () => {
+        await loadLeaderboard();
+        // 리더보드 로드 완료 후 팝업 표시
+        setTimeout(() => {
+          showTodayRecord();
+        }, 500);
+      });
+
+      // 오늘의 러닝 기록 팝업
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalClose = document.getElementById("modalClose");
+      const modalBody = document.getElementById("modalBody");
+      const modalSubtitle = document.getElementById("modalSubtitle");
+
+      // 팝업 열기 함수
+      async function showTodayRecord() {
+        try {
+          // 캐시 확인 (5분간 유효)
+          const cacheKey = 'todayRecordsCache';
+          const cacheTimeKey = 'todayRecordsCacheTime';
+          const cacheValidDuration = 5 * 60 * 1000; // 5분
+
+          const cachedData = localStorage.getItem(cacheKey);
+          const cacheTime = localStorage.getItem(cacheTimeKey);
+
+          let data;
+
+          if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime)) < cacheValidDuration) {
+            // 캐시된 데이터 사용
+            console.log("Using cached data");
+            data = JSON.parse(cachedData);
+          } else {
+            // 새로 데이터 로드
+            console.log("Fetching fresh data");
+            const response = await fetch("/.netlify/functions/get-today-records");
+
+            console.log("API Response status:", response.status);
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              console.error("API Error:", errorData);
+              throw new Error(`HTTP ${response.status}: ${JSON.stringify(errorData)}`);
+            }
+
+            data = await response.json();
+
+            // 캐시에 저장
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            localStorage.setItem(cacheTimeKey, Date.now().toString());
+          }
+
+          console.log("API Response data:", data);
+
+          if (data.records && data.records.length > 0) {
+            // 랜덤으로 하나 선택
+            const randomIndex = Math.floor(Math.random() * data.records.length);
+            const record = data.records[randomIndex];
+
+            // 멤버 ID를 이름으로 변환 (leaderboard 데이터 활용)
+            if (currentData && currentData.leaderboard) {
+              const member = currentData.leaderboard.find(m => m.id === record.name);
+              if (member) {
+                record.name = member.name;
+              }
+            }
+
+            // 데이터 준비 완료 후 팝업 표시
+            displayRecord(record, record.date);
+            modalOverlay.classList.add("active");
+          } else {
+            modalBody.innerHTML = `
+              <div class="no-records-message">
+                <p>😢 기록된 러닝이 없습니다.</p>
+                <p style="font-size: 14px; margin-top: 10px;">함께 달려요!</p>
+              </div>
+            `;
+            modalSubtitle.textContent = "데이터 없음";
+          }
+        } catch (error) {
+          console.error("러닝 기록 로드 실패:", error);
+          modalBody.innerHTML = `
+            <div class="no-records-message">
+              <p style="color: #e74c3c;">😢 기록을 불러오는데 실패했습니다.</p>
+              <p style="font-size: 12px; margin-top: 10px; color: #666;">
+                에러: ${error.message}
+              </p>
+            </div>
+          `;
+          modalSubtitle.textContent = "오류 발생";
+        }
+      }
+
+      // 기록 표시 함수
+      function displayRecord(record, date) {
+        modalSubtitle.textContent = `${record.name} 님의 기록 (${date})`;
+
+        const formatValue = (value) => {
+          return value && value.trim() !== ""
+            ? `<div class="value">${value}</div>`
+            : `<div class="value empty">기록 없음</div>`;
+        };
+
+        modalBody.innerHTML = `
+          <div class="record-field">
+            <label>📅 달린 날짜</label>
+            ${formatValue(record.date)}
+          </div>
+          <div class="record-field">
+            <label>⏱️ 달린 시간</label>
+            ${formatValue(record.duration ? `${record.duration}분` : "")}
+          </div>
+          <div class="record-field">
+            <label>📍 달린 장소</label>
+            ${formatValue(record.location)}
+          </div>
+          <div class="record-field">
+            <label>📝 오늘의 한줄 제목/Story</label>
+            ${formatValue(record.title)}
+          </div>
+          <div class="record-field">
+            <label>💭 달리기 전 생각/느낌</label>
+            ${formatValue(record.before)}
+          </div>
+          <div class="record-field">
+            <label>🏃 달리기 중 생각/느낌</label>
+            ${formatValue(record.during)}
+          </div>
+          <div class="record-field">
+            <label>✨ 달리기 후 생각/느낌</label>
+            ${formatValue(record.after)}
+          </div>
+        `;
+      }
+
+      // 팝업 닫기
+      modalClose.addEventListener("click", () => {
+        modalOverlay.classList.remove("active");
+      });
+
+      // 오버레이 클릭 시 닫기
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) {
+          modalOverlay.classList.remove("active");
+        }
+      });
     </script>
   </body>
 </html>
