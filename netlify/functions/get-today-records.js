@@ -74,7 +74,7 @@ exports.handler = async (event, context) => {
       .filter(p => {
         if (!p || !p.parent) return false;
         const pageDbId = p.parent.database_id?.replace(/-/g, '');
-        return pageDbId === process.env.DATA_SOURCE_ID;
+        return pageDbId === process.env.MULTI_DATA_SOURCE_ID;
       })
       .filter(page => {
         // 달린 날짜가 있는 것만
