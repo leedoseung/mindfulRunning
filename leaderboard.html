@@ -182,8 +182,15 @@
       /* 이름 열 */
       .name-cell {
         font-weight: 600;
-        color: #333;
+        color: #667eea;
         font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .name-cell:hover {
+        color: #764ba2;
+        text-decoration: underline;
       }
 
       /* 숫자 열들 */
@@ -242,9 +249,56 @@
         animation: spin 1s linear infinite;
       }
 
+      .diary-loading {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .diary-loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f0f0f0;
+        border-top-color: #667eea;
+        border-right-color: #764ba2;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      .diary-loading-text {
+        color: #667eea;
+        font-size: 16px;
+        font-weight: 600;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      .diary-loading-emoji {
+        font-size: 32px;
+        margin-bottom: 15px;
+        animation: bounce 1s ease-in-out infinite;
+      }
+
       @keyframes spin {
         to {
           transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes bounce {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
         }
       }
 
@@ -509,6 +563,78 @@
         font-size: 16px;
       }
 
+      /* 일기장 스타일 모달 */
+      .diary-modal-content {
+        max-width: 800px;
+      }
+
+      .diary-entry {
+        background: #fff9f0;
+        border-left: 4px solid #667eea;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .diary-entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px dashed #e0e0e0;
+      }
+
+      .diary-date {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 18px;
+      }
+
+      .diary-meta {
+        color: #999;
+        font-size: 14px;
+      }
+
+      .diary-content {
+        font-family: "Nanum Gothic", sans-serif;
+        line-height: 1.8;
+        color: #333;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .copy-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      }
+
+      .copy-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+      }
+
+      .copy-button:active {
+        transform: translateY(0);
+      }
+
+      .copy-all-button {
+        margin-bottom: 20px;
+        width: 100%;
+        padding: 12px 24px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
       /* 모바일 반응형 */
       @media (max-width: 480px) {
         .today-record-button {
@@ -534,6 +660,18 @@
         .record-field .value {
           font-size: 14px;
           padding: 10px;
+        }
+
+        .diary-entry {
+          padding: 15px;
+        }
+
+        .diary-date {
+          font-size: 16px;
+        }
+
+        .diary-meta {
+          font-size: 12px;
         }
       }
     </style>
@@ -602,7 +740,7 @@
 
     <a href="/" class="home-button">🏃 기록하러 가기</a>
 
-    <!-- 레이어 팝업 -->
+    <!-- 레이어 팝업 - 랜덤 기록 -->
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal-content">
         <button class="modal-close" id="modalClose">&times;</button>
@@ -611,6 +749,22 @@
           <p class="subtitle" id="modalSubtitle">로딩 중...</p>
         </div>
         <div id="modalBody">
+          <div class="loading" style="padding: 40px 20px;">
+            <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 레이어 팝업 - 멤버 일기장 -->
+    <div class="modal-overlay" id="diaryModalOverlay">
+      <div class="modal-content diary-modal-content">
+        <button class="modal-close" id="diaryModalClose">&times;</button>
+        <div class="modal-header">
+          <h2>📖 <span id="diaryMemberName"></span>님의 러닝 일기</h2>
+          <p class="subtitle" id="diarySubtitle">총 <span id="diaryRecordCount">0</span>개의 기록</p>
+        </div>
+        <div id="diaryBody">
           <div class="loading" style="padding: 40px 20px;">
             <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
           </div>
@@ -734,13 +888,19 @@
         const ceiledTime = Math.ceil(member.totalTime);
 
         row.innerHTML = `
-          <div class="name-cell">${member.name}</div>
+          <div class="name-cell" data-member-id="${member.id}" data-member-name="${member.name}">${member.name}</div>
           <div class="number-cell">${member.count}</div>
           <div class="number-cell">${ceiledTime}</div>
           <div class="group-cell">${member.group || "-"}</div>
           <div class="insta-cell">${member.instaId || "-"}</div>
           <div class="location-cell">${member.location || "-"}</div>
         `;
+
+        // 이름 클릭 이벤트 추가
+        const nameCell = row.querySelector(".name-cell");
+        nameCell.addEventListener("click", () => {
+          showMemberDiary(member.id, member.name, member.count);
+        });
 
         return row;
       }
@@ -939,6 +1099,204 @@
       modalOverlay.addEventListener("click", (e) => {
         if (e.target === modalOverlay) {
           modalOverlay.classList.remove("active");
+        }
+      });
+
+      // === 멤버 일기장 기능 ===
+      const diaryModalOverlay = document.getElementById("diaryModalOverlay");
+      const diaryModalClose = document.getElementById("diaryModalClose");
+      const diaryBody = document.getElementById("diaryBody");
+      const diaryMemberName = document.getElementById("diaryMemberName");
+      const diaryRecordCount = document.getElementById("diaryRecordCount");
+
+      // 멤버 일기장 표시
+      async function showMemberDiary(memberId, memberName, expectedCount) {
+        try {
+          // 모달 열기
+          diaryModalOverlay.classList.add("active");
+          diaryMemberName.textContent = memberName;
+          diaryRecordCount.textContent = "0";
+
+          // 로딩 표시
+          diaryBody.innerHTML = `
+            <div class="diary-loading">
+              <div class="diary-loading-emoji">🏃💨</div>
+              <div class="diary-loading-spinner"></div>
+              <p class="diary-loading-text">러닝 일기를 불러오는 중...</p>
+            </div>
+          `;
+
+          // 캐시 확인 (1시간 유효)
+          const cacheKey = `memberRecords_${memberId}`;
+          const cacheTimeKey = `memberRecordsTime_${memberId}`;
+          const cacheValidDuration = 60 * 60 * 1000; // 1시간
+
+          const cachedData = localStorage.getItem(cacheKey);
+          const cacheTime = localStorage.getItem(cacheTimeKey);
+
+          let data;
+          let useCache = false;
+
+          // 캐시가 있고 유효하면, 기록 수가 일치하는지 확인
+          if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime)) < cacheValidDuration) {
+            const parsed = JSON.parse(cachedData);
+            const cachedCount = parsed.records?.length || 0;
+            if (cachedCount === expectedCount) {
+              console.log("Using cached data for:", memberName, `(${cachedCount}/${expectedCount} records match)`);
+              data = parsed;
+              useCache = true;
+            } else {
+              console.log("Cache invalidated: count mismatch", `(cached: ${cachedCount}, expected: ${expectedCount})`);
+            }
+          }
+
+          if (!useCache) {
+            console.log("Fetching fresh member records for:", memberName, "memberId:", memberId);
+            const response = await fetch(`/.netlify/functions/get-member-records?memberId=${memberId}`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+
+            data = await response.json();
+            console.log("API Response:", data);
+
+            // 캐시에 저장
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            localStorage.setItem(cacheTimeKey, Date.now().toString());
+          }
+
+          if (data.records && data.records.length > 0) {
+            diaryRecordCount.textContent = data.records.length;
+            displayDiaryRecords(data.records, memberName);
+          } else {
+            diaryBody.innerHTML = `
+              <div class="no-records-message">
+                <p>😢 아직 기록이 없습니다.</p>
+                <p style="font-size: 14px; margin-top: 10px;">첫 러닝을 시작해보세요!</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error("멤버 기록 로드 실패:", error);
+          diaryBody.innerHTML = `
+            <div class="no-records-message">
+              <p style="color: #e74c3c;">😢 기록을 불러오는데 실패했습니다.</p>
+              <p style="font-size: 12px; margin-top: 10px; color: #666;">
+                에러: ${error.message}
+              </p>
+            </div>
+          `;
+        }
+      }
+
+      // 일기장 형식으로 기록 표시
+      function displayDiaryRecords(records, memberName) {
+        let html = `
+          <button class="copy-button copy-all-button" onclick="copyAllRecords()">
+            📋 전체 복사하기
+          </button>
+        `;
+
+        records.forEach((record, index) => {
+          const displayText = formatRecordForDisplay(record, memberName);
+          html += `
+            <div class="diary-entry">
+              <div class="diary-entry-header">
+                <div class="diary-date">📅 ${record.date}</div>
+                <div>
+                  <span class="diary-meta">⏱️ ${record.duration}분</span>
+                  <button class="copy-button" onclick="copyRecord(${index})" style="margin-left: 10px;">
+                    📋 복사
+                  </button>
+                </div>
+              </div>
+              <div class="diary-content" id="diary-record-${index}">${displayText}</div>
+            </div>
+          `;
+        });
+
+        diaryBody.innerHTML = html;
+
+        // 전역 변수에 저장 (복사 기능용)
+        window.currentDiaryRecords = records;
+        window.currentDiaryMemberName = memberName;
+      }
+
+      // 화면 표시용 포맷팅 (날짜 제외)
+      function formatRecordForDisplay(record, memberName) {
+        let text = '';
+        if (record.location) text += `📍 ${record.location}\n\n`;
+        if (record.title) text += `✏️ ${record.title}\n\n`;
+        if (record.before) text += `💭 달리기 전 생각/느낌\n${record.before}\n\n`;
+        if (record.during) text += `🏃 달리기 중 생각/느낌\n${record.during}\n\n`;
+        if (record.after) text += `✨ 달리기 후 생각/느낌\n${record.after}\n\n`;
+        text += `by ${memberName}`;
+
+        return text;
+      }
+
+      // 기록을 복사 형식으로 포맷팅
+      function formatRecordForCopy(record, memberName) {
+        let text = `📅 ${record.date}\n`;
+        text += `⏱️ ${record.duration}분\n`;
+        if (record.location) text += `📍 ${record.location}\n`;
+        text += `\n`;
+        if (record.title) text += `✏️ ${record.title}\n\n`;
+        if (record.before) text += `💭 달리기 전 생각/느낌\n${record.before}\n\n`;
+        if (record.during) text += `🏃 달리기 중 생각/느낌\n${record.during}\n\n`;
+        if (record.after) text += `✨ 달리기 후 생각/느낌\n${record.after}\n\n`;
+        text += `by ${memberName}`;
+
+        return text;
+      }
+
+      // 개별 기록 복사
+      function copyRecord(index) {
+        const record = window.currentDiaryRecords[index];
+        const memberName = window.currentDiaryMemberName;
+        const text = formatRecordForCopy(record, memberName);
+
+        navigator.clipboard.writeText(text).then(() => {
+          alert("✅ 기록이 복사되었습니다!");
+        }).catch(err => {
+          console.error("복사 실패:", err);
+          alert("❌ 복사에 실패했습니다.");
+        });
+      }
+
+      // 전체 기록 복사
+      function copyAllRecords() {
+        const records = window.currentDiaryRecords;
+        const memberName = window.currentDiaryMemberName;
+
+        let allText = `📖 ${memberName}님의 러닝 일기 (총 ${records.length}개)\n`;
+        allText += `${"=".repeat(50)}\n\n`;
+
+        records.forEach((record, index) => {
+          allText += formatRecordForCopy(record, memberName);
+          if (index < records.length - 1) {
+            allText += `\n\n${"-".repeat(50)}\n\n`;
+          }
+        });
+
+        navigator.clipboard.writeText(allText).then(() => {
+          alert("✅ 전체 기록이 복사되었습니다!");
+        }).catch(err => {
+          console.error("복사 실패:", err);
+          alert("❌ 복사에 실패했습니다.");
+        });
+      }
+
+      // 일기장 팝업 닫기
+      diaryModalClose.addEventListener("click", () => {
+        diaryModalOverlay.classList.remove("active");
+      });
+
+      // 오버레이 클릭 시 닫기
+      diaryModalOverlay.addEventListener("click", (e) => {
+        if (e.target === diaryModalOverlay) {
+          diaryModalOverlay.classList.remove("active");
         }
       });
     </script>

@@ -16,6 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `netlify/functions/save-to-notion.js` - POST handler to save running logs to Notion database
 - `netlify/functions/get-members.js` - GET handler to fetch member list from Notion
 - `netlify/functions/get-leaderboard.js` - GET handler to fetch leaderboard data with run counts
+- `netlify/functions/get-member-records.js` - GET handler to fetch all running records for a specific member
+- `netlify/functions/get-today-records.js` - GET handler to fetch recent running records for random display
 
 **Data**: Notion databases
 - Member database (db-mfrs-member) - Contains member profiles with rollup fields for cumulative stats (`누적 달린 횟수`, `누적 달린 시간`)
@@ -35,7 +37,8 @@ netlify dev
 ## Environment Variables (Netlify)
 
 - `NOTION_API_KEY` - Notion integration token
-- `DATA_SOURCE_ID` - Running log database ID
+- `DATA_SOURCE_ID` - Running log database ID (with hyphens)
+- `MULTI_DATA_SOURCE_ID` - Running log database ID (without hyphens, for filtering)
 - `MEMBER_DATA_SOURCE_ID` - Member database ID
 
 ## Notion API Notes
@@ -78,3 +81,30 @@ netlify dev
 - 글자 크기 증가 (모바일 13~14px, 데스크탑 16px)
 - 그룹/주활동 셀 배경색 제거, 행 높이 증가
 - `max-height` 제거하여 전체 데이터 표시
+
+## Change Log (2026-02-07)
+
+### 멤버별 러닝 일기장 기능 추가
+- **리더보드에서 멤버 이름 클릭 시 해당 멤버의 모든 달리기 기록을 일기장 형식으로 표시**
+- `netlify/functions/get-member-records.js` 생성
+  - Search API로 최근 100개 페이지만 조회 (성능 최적화)
+  - 각 페이지를 개별 조회하여 relation 데이터 확보
+  - database_id 필터링 및 member ID 매칭
+  - 날짜순 정렬 (최신순)
+- `leaderboard.html` 수정
+  - 멤버 이름 셀에 클릭 이벤트 추가 (hover 효과 포함)
+  - 일기장 스타일 모달 팝업 추가
+  - 로딩 애니메이션 (bouncing emoji + spinner)
+  - 1시간 캐시 적용 (두 번째 클릭부터 빠른 로딩)
+  - 개별 기록 복사 및 전체 기록 복사 기능
+  - 일기 형식: 날짜, 시간, 장소, 제목, 달리기 전/중/후 생각
+
+### 성능 최적화 및 제약사항
+- Search API 사용으로 최근 100개 페이지만 조회 (Database Query API는 multi-data-source에서 작동하지 않음)
+- Data Sources Query API는 relation 필드를 populate하지 않아 사용 불가
+- 첫 로딩은 느릴 수 있으나 localStorage 캐시(1시간)로 재방문 시 빠른 응답
+- 100개 이상의 기록이 있는 경우 오래된 기록은 표시되지 않을 수 있음
+
+### 기술적 이슈 해결
+- Notion API relation 필드 접근 방법: Data Sources Query API는 relation을 비워둠 → Search API + 개별 페이지 조회 필요
+- Property 이름 처리: `이름\`` (백틱 포함) 등 특수 문자 포함된 한글 속성명 처리
