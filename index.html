@@ -678,8 +678,17 @@
       }
 
       // 페이지 로드 시 오늘 날짜 설정 및 멤버 로드
+      function getLocalDateString(offsetDays = 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateString(0);
         document.getElementById("date").value = today;
         loadMembers();
       });
