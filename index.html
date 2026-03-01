@@ -310,6 +310,30 @@
         box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
       }
 
+      .archive-button {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        margin-top: 10px;
+      }
+
+      .archive-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
       .success-message {
         text-align: center;
         color: #10b981;
@@ -457,6 +481,7 @@
 
           <button type="submit">📝 기록하기</button>
           <a href="javascript:void(0)" class="leaderboard-button" id="leaderboardBtn">🏆 리더보드 보기</a>
+          <a href="/archive.html" class="archive-button">📊 월별 아카이브 보기</a>
           <div class="loading">⏳ Notion에 저장 중...</div>
           <div class="error-message"></div>
         </form>
