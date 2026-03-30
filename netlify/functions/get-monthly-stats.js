@@ -83,10 +83,13 @@ exports.handler = async (event, context) => {
         const duration = page.properties?.["달린 시간(분)"]?.number || 0;
 
         if (!stats[memberId]) {
-          stats[memberId] = { monthlyCount: 0, monthlyMinutes: 0 };
+          stats[memberId] = { monthlyCount: 0, monthlyMinutes: 0, monthlyMax: 0 };
         }
         stats[memberId].monthlyCount++;
         stats[memberId].monthlyMinutes += duration;
+        if (duration > stats[memberId].monthlyMax) {
+          stats[memberId].monthlyMax = duration;
+        }
       });
 
       hasMore = data.has_more;
