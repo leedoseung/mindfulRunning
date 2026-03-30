@@ -110,7 +110,7 @@
 
       .table-header {
         display: grid;
-        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr 1.2fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
         background: #f8f9fa;
         color: #555;
         padding: 16px 20px;
@@ -162,7 +162,7 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr 1.2fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
         padding: 18px 20px;
         border-bottom: 1px solid #f0f0f0;
         font-size: 16px;
@@ -727,7 +727,6 @@
           <div>이달 횟수</div>
           <div>이달 시간(분)</div>
           <div>이달 최장(분)</div>
-          <div>인스타</div>
         </div>
         <div class="table-rows" id="tableRows"></div>
       </div>
@@ -905,7 +904,6 @@
           <div class="number-cell">${member.monthlyCount || 0}</div>
           <div class="number-cell">${Math.ceil(member.monthlyMinutes || 0)}</div>
           <div class="number-cell">${member.monthlyMax || 0}</div>
-          <div class="insta-cell">${member.instaId || "-"}</div>
         `;
 
         // 이름 클릭 이벤트 추가
