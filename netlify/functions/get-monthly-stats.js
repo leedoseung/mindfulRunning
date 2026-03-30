@@ -19,14 +19,17 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // 이번달 날짜 범위 계산
+    // 이번달 날짜 범위 계산 (1일 ~ 오늘)
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth(); // 0-indexed
     const monthStart = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-    const nextMonthYear = month === 11 ? year + 1 : year;
-    const nextMonthNum = month === 11 ? 1 : month + 2;
-    const monthEnd = `${nextMonthYear}-${String(nextMonthNum).padStart(2, "0")}-01`;
+    const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+    // 조기 종료 기준: last_edited_time이 monthStart보다 하루 전이면 중단
+    // (한국 KST = UTC+9 시차 보정 포함)
+    const stopBeforeDate = new Date(monthStart + "T00:00:00.000Z");
+    stopBeforeDate.setDate(stopBeforeDate.getDate() - 1); // 1일 여유
 
     const targetDbId = process.env.MULTI_DATA_SOURCE_ID;
     const stats = {}; // memberId -> { monthlyCount, monthlyMinutes }
@@ -34,7 +37,7 @@ exports.handler = async (event, context) => {
     let hasMore = true;
     let startCursor = undefined;
     let batchCount = 0;
-    const MAX_BATCHES = 5; // 최대 500개 조회
+    const MAX_BATCHES = 30; // 안전 상한선 (3000개)
 
     while (hasMore && batchCount < MAX_BATCHES) {
       batchCount++;
@@ -68,11 +71,11 @@ exports.handler = async (event, context) => {
         return pageDbId === targetDbId;
       });
 
-      // 이번달 기록만 집계
+      // 이번달 기록 집계 (1일 ~ 오늘)
       runningPages.forEach((page) => {
         const date = page.properties?.["달린 날짜"]?.date?.start;
         if (!date) return;
-        if (date < monthStart || date >= monthEnd) return;
+        if (date < monthStart || date > today) return;
 
         const memberId = page.properties?.["이름`"]?.relation?.[0]?.id;
         if (!memberId) return;
@@ -88,6 +91,15 @@ exports.handler = async (event, context) => {
 
       hasMore = data.has_more;
       startCursor = data.next_cursor;
+
+      // 이번 배치 마지막 페이지의 last_edited_time이 이달 시작 이전이면 중단
+      if (data.results.length > 0) {
+        const oldestInBatch = data.results[data.results.length - 1];
+        const oldestEditTime = new Date(oldestInBatch.last_edited_time);
+        if (oldestEditTime < stopBeforeDate) {
+          break;
+        }
+      }
     }
 
     return {
@@ -96,6 +108,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         stats,
         month: monthStart,
+        batchCount, // 디버깅용
       }),
     };
   } catch (error) {
