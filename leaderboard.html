@@ -110,7 +110,7 @@
 
       .table-header {
         display: grid;
-        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
+        grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
         background: #f8f9fa;
         color: #555;
         padding: 16px 20px;
@@ -162,7 +162,7 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
+        grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
         padding: 18px 20px;
         border-bottom: 1px solid #f0f0f0;
         font-size: 16px;
@@ -717,16 +717,14 @@
         <div class="table-header">
           <div>이름</div>
           <div class="sortable active" data-sort="count">
-            횟수
+            이달 횟수
             <span class="sort-arrow" id="countArrow">↓</span>
           </div>
           <div class="sortable" data-sort="time">
-            시간(분)
+            이달 시간(분)
             <span class="sort-arrow">↑↓</span>
           </div>
-          <div>그룹</div>
           <div>인스타</div>
-          <div>주활동</div>
         </div>
         <div class="table-rows" id="tableRows"></div>
       </div>
@@ -793,19 +791,30 @@
       // 리더보드 데이터 로드
       async function loadLeaderboard() {
         try {
-          const response = await fetch("/.netlify/functions/get-leaderboard");
+          // 멤버 목록 + 이달 통계 병렬 조회
+          const [leaderboardRes, monthlyRes] = await Promise.all([
+            fetch("/.netlify/functions/get-leaderboard"),
+            fetch("/.netlify/functions/get-monthly-stats"),
+          ]);
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
+          if (!leaderboardRes.ok) throw new Error(`HTTP ${leaderboardRes.status}`);
 
-          const data = await response.json();
+          const leaderboardData = await leaderboardRes.json();
+          const monthlyData = monthlyRes.ok ? await monthlyRes.json() : { stats: {} };
+          const monthlyStats = monthlyData.stats || {};
 
-          if (data.leaderboard && data.leaderboard.length > 0) {
-            currentData = data;
-            filteredData = [...data.leaderboard];
-            sortAndDisplay("count", false); // 기본 정렬: 횟수 내림차순
-            return data; // 데이터 반환
+          if (leaderboardData.leaderboard && leaderboardData.leaderboard.length > 0) {
+            // 멤버 데이터에 이달 통계 합산
+            const merged = leaderboardData.leaderboard.map((member) => ({
+              ...member,
+              monthlyCount: monthlyStats[member.id]?.monthlyCount || 0,
+              monthlyMinutes: monthlyStats[member.id]?.monthlyMinutes || 0,
+            }));
+
+            currentData = { ...leaderboardData, leaderboard: merged };
+            filteredData = [...merged];
+            sortAndDisplay("count", false);
+            return currentData;
           } else {
             showError("아직 기록이 없습니다.");
             return null;
@@ -825,11 +834,11 @@
 
         if (field === "count") {
           sorted.sort((a, b) =>
-            ascending ? a.count - b.count : b.count - a.count,
+            ascending ? a.monthlyCount - b.monthlyCount : b.monthlyCount - a.monthlyCount,
           );
         } else if (field === "time") {
           sorted.sort((a, b) =>
-            ascending ? a.totalTime - b.totalTime : b.totalTime - a.totalTime,
+            ascending ? a.monthlyMinutes - b.monthlyMinutes : b.monthlyMinutes - a.monthlyMinutes,
           );
         }
 
@@ -867,8 +876,10 @@
           tableRows.innerHTML =
             '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">검색 결과가 없습니다.</div>';
         } else {
-          // 모든 멤버 표시
-          members.forEach((member) => {
+          // 이달 기록 있는 멤버만 표시
+          members
+            .filter((member) => member.monthlyCount > 0)
+            .forEach((member) => {
             const row = createTableRow(member);
             tableRows.appendChild(row);
           });
@@ -884,16 +895,11 @@
         const row = document.createElement("div");
         row.className = "table-row";
 
-        // 달린시간 올림 (소수점 올림하여 정수)
-        const ceiledTime = Math.ceil(member.totalTime);
-
         row.innerHTML = `
           <div class="name-cell" data-member-id="${member.id}" data-member-name="${member.name}">${member.name}</div>
-          <div class="number-cell">${member.count}</div>
-          <div class="number-cell">${ceiledTime}</div>
-          <div class="group-cell">${member.group || "-"}</div>
+          <div class="number-cell">${member.monthlyCount}</div>
+          <div class="number-cell">${Math.ceil(member.monthlyMinutes)}</div>
           <div class="insta-cell">${member.instaId || "-"}</div>
-          <div class="location-cell">${member.location || "-"}</div>
         `;
 
         // 이름 클릭 이벤트 추가
