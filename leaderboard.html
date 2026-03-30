@@ -110,7 +110,7 @@
 
       .table-header {
         display: grid;
-        grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
         background: #f8f9fa;
         color: #555;
         padding: 16px 20px;
@@ -162,7 +162,7 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 1.2fr;
         padding: 18px 20px;
         border-bottom: 1px solid #f0f0f0;
         font-size: 16px;
@@ -717,13 +717,15 @@
         <div class="table-header">
           <div>이름</div>
           <div class="sortable active" data-sort="count">
-            이달 횟수
+            총 횟수
             <span class="sort-arrow" id="countArrow">↓</span>
           </div>
           <div class="sortable" data-sort="time">
-            이달 시간(분)
+            총 시간(분)
             <span class="sort-arrow">↑↓</span>
           </div>
+          <div>이달 횟수</div>
+          <div>이달 시간(분)</div>
           <div>인스타</div>
         </div>
         <div class="table-rows" id="tableRows"></div>
@@ -791,7 +793,6 @@
       // 리더보드 데이터 로드
       async function loadLeaderboard() {
         try {
-          // 멤버 목록 + 이달 통계 병렬 조회
           const [leaderboardRes, monthlyRes] = await Promise.all([
             fetch("/.netlify/functions/get-leaderboard"),
             fetch("/.netlify/functions/get-monthly-stats"),
@@ -799,22 +800,21 @@
 
           if (!leaderboardRes.ok) throw new Error(`HTTP ${leaderboardRes.status}`);
 
-          const leaderboardData = await leaderboardRes.json();
+          const data = await leaderboardRes.json();
           const monthlyData = monthlyRes.ok ? await monthlyRes.json() : { stats: {} };
           const monthlyStats = monthlyData.stats || {};
 
-          if (leaderboardData.leaderboard && leaderboardData.leaderboard.length > 0) {
-            // 멤버 데이터에 이달 통계 합산
-            const merged = leaderboardData.leaderboard.map((member) => ({
+          if (data.leaderboard && data.leaderboard.length > 0) {
+            // 이달 통계 합산
+            data.leaderboard = data.leaderboard.map((member) => ({
               ...member,
               monthlyCount: monthlyStats[member.id]?.monthlyCount || 0,
               monthlyMinutes: monthlyStats[member.id]?.monthlyMinutes || 0,
             }));
-
-            currentData = { ...leaderboardData, leaderboard: merged };
-            filteredData = [...merged];
+            currentData = data;
+            filteredData = [...data.leaderboard];
             sortAndDisplay("count", false);
-            return currentData;
+            return data;
           } else {
             showError("아직 기록이 없습니다.");
             return null;
@@ -834,11 +834,11 @@
 
         if (field === "count") {
           sorted.sort((a, b) =>
-            ascending ? a.monthlyCount - b.monthlyCount : b.monthlyCount - a.monthlyCount,
+            ascending ? a.count - b.count : b.count - a.count,
           );
         } else if (field === "time") {
           sorted.sort((a, b) =>
-            ascending ? a.monthlyMinutes - b.monthlyMinutes : b.monthlyMinutes - a.monthlyMinutes,
+            ascending ? a.totalTime - b.totalTime : b.totalTime - a.totalTime,
           );
         }
 
@@ -876,10 +876,8 @@
           tableRows.innerHTML =
             '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">검색 결과가 없습니다.</div>';
         } else {
-          // 이달 기록 있는 멤버만 표시
-          members
-            .filter((member) => member.monthlyCount > 0)
-            .forEach((member) => {
+          // 모든 멤버 표시
+          members.forEach((member) => {
             const row = createTableRow(member);
             tableRows.appendChild(row);
           });
@@ -895,10 +893,15 @@
         const row = document.createElement("div");
         row.className = "table-row";
 
+        // 달린시간 올림 (소수점 올림하여 정수)
+        const ceiledTime = Math.ceil(member.totalTime);
+
         row.innerHTML = `
           <div class="name-cell" data-member-id="${member.id}" data-member-name="${member.name}">${member.name}</div>
-          <div class="number-cell">${member.monthlyCount}</div>
-          <div class="number-cell">${Math.ceil(member.monthlyMinutes)}</div>
+          <div class="number-cell">${member.count}</div>
+          <div class="number-cell">${ceiledTime}</div>
+          <div class="number-cell">${member.monthlyCount || 0}</div>
+          <div class="number-cell">${Math.ceil(member.monthlyMinutes || 0)}</div>
           <div class="insta-cell">${member.instaId || "-"}</div>
         `;
 
