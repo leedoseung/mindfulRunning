@@ -104,8 +104,7 @@
       .table-content {
         display: flex;
         flex-direction: column;
-        min-width: 100%;
-        width: 100%;
+        min-width: 600px;
       }
 
       .table-header {
@@ -120,9 +119,6 @@
         align-items: center;
         user-select: none;
         border-bottom: 2px solid #e0e0e0;
-        position: sticky;
-        top: 0;
-        z-index: 10;
       }
 
       .table-header > div {
@@ -714,6 +710,7 @@
 
       <!-- Grid 테이블 -->
       <div class="table-container" id="tableContainer" style="display: none">
+        <div class="table-content">
         <div class="table-header">
           <div>이름</div>
           <div class="sortable active" data-sort="count">
@@ -729,6 +726,7 @@
           <div>이달 최장(분)</div>
         </div>
         <div class="table-rows" id="tableRows"></div>
+        </div>
       </div>
 
       <div id="errorContainer"></div>
