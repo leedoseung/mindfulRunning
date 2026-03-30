@@ -182,11 +182,22 @@
         font-size: 16px;
         cursor: pointer;
         transition: all 0.2s ease;
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 1;
       }
 
       .name-cell:hover {
         color: #764ba2;
         text-decoration: underline;
+      }
+
+      .table-header > div:first-child {
+        position: sticky;
+        left: 0;
+        background: #f8f9fa;
+        z-index: 2;
       }
 
       /* 숫자 열들 */
