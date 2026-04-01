@@ -1,0 +1,285 @@
+# Archive Hub Page Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Create `archive.html` - a hub page linking to monthly running insight dashboards.
+
+**Architecture:** Single static HTML file with purple gradient style (matching leaderboard.html). Month cards in a 2-column responsive grid. February card is active (links to `2026-02.html`), other months show "준비 중".
+
+**Tech Stack:** Plain HTML, CSS (inline), no JS required.
+
+---
+
+### Task 1: Create `archive.html`
+
+**Files:**
+- Create: `archive.html`
+
+**Step 1: Create the file**
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>마인드풀러닝 아카이브</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 32px;
+      padding: 20px 0;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .card.inactive {
+      opacity: 0.65;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #667eea;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 16px;
+    }
+
+    .stats {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .stat-label { color: #6c757d; }
+    .stat-value { font-weight: 600; color: #1a1a2e; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-active:hover { opacity: 0.9; }
+
+    .btn-inactive {
+      background: #f0f0f0;
+      color: #aaa;
+      cursor: default;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .back-link:hover { color: white; }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/leaderboard.html" class="back-link">← 리더보드로</a>
+
+    <header class="header">
+      <h1>🏃 마인드풀러닝 아카이브</h1>
+      <p>월별 달리기 인사이트 대시보드</p>
+    </header>
+
+    <div class="grid">
+
+      <!-- 2월 - 활성 -->
+      <div class="card">
+        <div class="card-label">2026년</div>
+        <div class="card-title">2월 📊</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">참여 러너</span>
+            <span class="stat-value">63명</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 기록</span>
+            <span class="stat-value">648회</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 시간</span>
+            <span class="stat-value">581시간</span>
+          </div>
+        </div>
+        <a href="/2026-02.html" class="btn btn-active">대시보드 보기 →</a>
+      </div>
+
+      <!-- 3월 - 준비중 -->
+      <div class="card inactive">
+        <div class="card-label">2026년</div>
+        <div class="card-title">3월 📊</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">참여 러너</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 기록</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 시간</span>
+            <span class="stat-value">-</span>
+          </div>
+        </div>
+        <span class="btn btn-inactive">준비 중...</span>
+      </div>
+
+      <!-- 4월 - 준비중 -->
+      <div class="card inactive">
+        <div class="card-label">2026년</div>
+        <div class="card-title">4월 📊</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">참여 러너</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 기록</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 시간</span>
+            <span class="stat-value">-</span>
+          </div>
+        </div>
+        <span class="btn btn-inactive">준비 중...</span>
+      </div>
+
+      <!-- 12월 - 준비중 -->
+      <div class="card inactive">
+        <div class="card-label">2026년</div>
+        <div class="card-title">12월 📊</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">참여 러너</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 기록</span>
+            <span class="stat-value">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">총 달리기 시간</span>
+            <span class="stat-value">-</span>
+          </div>
+        </div>
+        <span class="btn btn-inactive">준비 중...</span>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
+```
+
+**Step 2: Verify in browser**
+
+Open `archive.html` via `netlify dev` and check:
+- [ ] 2열 카드 그리드 표시
+- [ ] 2월 카드 → `2026-02.html` 링크 작동
+- [ ] 3/4/12월 카드 → 클릭 불가 (준비 중)
+- [ ] 모바일(600px 이하) → 1열로 변경
+
+**Step 3: Commit**
+
+```bash
+git add archive.html
+git commit -m "feat: add monthly archive hub page"
+```
+
+---
+
+### Task 2: 2월 대시보드 파일 배치
+
+**Files:**
+- Add: `2026-02.html` (copy from Downloads/mindful-runners-dashboard.html)
+
+**Step 1: Copy the file**
+
+```bash
+cp ~/Downloads/mindful-runners-dashboard.html /Users/duvis/DuvisProject/mindfulRunning/2026-02.html
+```
+
+**Step 2: Commit**
+
+```bash
+git add 2026-02.html
+git commit -m "feat: add February 2026 dashboard"
+```
